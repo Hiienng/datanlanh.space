@@ -1,5 +1,19 @@
 <script type="text/javascript">
   window.HOPESEED_API_BASE = 'https://hopeseed.onrender.com';
+  // --- HTTP helper dùng chung (toàn cục) ---
+  window.httpPost = async function(url, body){
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      let msg = `HTTP ${res.status} ${res.statusText}`;
+      try { const j = await res.json(); if (j && j.detail) msg = j.detail; } catch {}
+      throw new Error(msg);
+    }
+    return res.json();
+  };
   /* === XLSX helpers (nếu bạn dùng) === */
   var gk_isXlsx = false;
   var gk_xlsxFileLookup = {};
@@ -36,6 +50,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Pacifico&family=Style+Script&display=swap&subset=vietnamese" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxuvwv/b4jzlGC62Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="icon" href="https://ik.imagekit.io/o2u9hny2s/hopeseed/LOGO8.png" type="image/png">
+
   <style>
     :root {
       color-scheme: light;
@@ -148,6 +164,14 @@
       transition: transform .2s ease, background .2s ease; white-space: nowrap;
     }
     .fab-btn:hover{ background:#f8fbff; transform: translateY(-1px); }
+    .btn-flat {
+      background-color: #3788bb;   /* màu mặc định */
+      color: #fff;
+      transition: all 0.25s ease;
+      }
+      .btn-flat:hover {
+        background-color: #120747;  /* màu hover */
+      }
   </style>
 </head>
 
@@ -162,21 +186,24 @@
     <nav class="max-w-6xl mx-auto px-6 pt-8">
       <div class="glass-card rounded-3xl px-6 py-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <a href="index.html" class="flex items-center gap-3">
-          <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500 text-white text-lg font-semibold tracking-tight shadow-lg shadow-blue-500/40">HS</span>
+          <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl">
+                <img src="https://ik.imagekit.io/o2u9hny2s/hopeseed/LOGO8.png"
+                 alt="logo" class="h-full w-full object-contain bg-transparent" loading="lazy"/>
+          </span>
           <div>
-            <p class="text-xs uppercase tracking-[0.35em] text-blue-700" data-i18n="brand_tag">HopeSeed</p>
-            <p class="text-base font-semibold text-slate-900" data-i18n="brand_title">Mảnh Vườn Hy Vọng</p>
+            <p class="text-xs uppercase tracking-[0.35em] text-black-700" data-i18n="brand_tag">HopeSeed</p>
+            <p class="text-base font-semibold text-slate-900" data-i18n="brand_title">Hệ thống quyên góp P2P </p>
           </div>
         </a>
 
         <div class="flex flex-wrap items-center gap-3 text-sm">
           <button id="langBtn" class="rounded-full border border-blue-200/60 bg-white/70 px-3 py-1 text-blue-700 hover:bg-blue-50 transition" title="Switch language">EN / VI</button>
-          <span id="userInfo" class="rounded-full bg-blue-50 px-3 py-1 text-blue-700 border border-blue-200/60" data-i18n="not_logged">Chưa đăng nhập</span>
+          <!-- <span id="userInfo" class="rounded-full bg-blue-50 px-3 py-1 text-blue-700 border border-blue-200/60" data-i18n="not_logged">Chưa đăng nhập</span> -->
           <button id="logoutBtn" class="hidden rounded-full border border-red-200 px-3 py-1 text-red-600 transition hover:bg-red-50">
             <i class="fas fa-sign-out-alt mr-1"></i><span data-i18n="logout">Đăng xuất</span>
           </button>
           <button id="loginToggleBtn" class="rounded-full bg-slate-900 px-4 py-2 text-white transition hover:bg-slate-800 shadow-lg shadow-slate-900/20">
-            <i class="fas fa-sign-in-alt mr-1"></i><span data-i18n="login">Đăng nhập</span>
+            <i class="fas fa-sign-in-alt mr-1"></i><span data-i18n="login">Đăng nhập/Đăng ký</span>
           </button>
         </div>
       </div>
@@ -198,11 +225,12 @@
             Hoặc bạn có thể chính là cầu nối bệnh nhận với các nhà hảo tâm.
           </p>
           <div class="flex flex-wrap items-center gap-3">
-            <button type="button"
-              class="rounded-full bg-blue-500 px-6 py-3 font-medium text-white shadow-lg shadow-blue-500/30 transition hover:-translate-y-0.5 hover:bg-blue-600"
-              onclick="window.location.href='hopestories.html'">
-              <i class="fas fa-hand-holding-heart mr-1"></i> <span data-i18n="cta_more">Xem các câu chuyện hy vọng ✨</span>
-            </button>
+          <button type="button"
+            class="btn-flat rounded-full px-6 py-3 font-medium shadow-lg transition hover:-translate-y-0.5"
+            onclick="window.location.href='hopestories.html'">
+            <i class="fas fa-hand-holding-heart mr-1"></i>
+            <span data-i18n="cta_more">Xem các câu chuyện hy vọng ✨</span>
+          </button>
           </div>
 
           <dl class="grid grid-cols-2 gap-6 pt-2 sm:max-w-lg">
@@ -221,12 +249,8 @@
         <div class="relative">
           <div class="hero-glow hidden lg:block" aria-hidden="true"></div>
           <div class="glass-card--transparent overflow-hidden rounded-[32px] ring-1 ring-white/40">
-            <img src="https://ik.imagekit.io/o2u9hny2s/hopeseed/IMA3.png"
+            <img src="https://ik.imagekit.io/o2u9hny2s/hopeseed/IMA5-1.png"
                  alt="Vietnam map" class="h-full w-full object-contain bg-transparent" loading="lazy"/>
-          </div>
-          <div class="absolute -bottom-12 -left-10 hidden w-56 overflow-hidden rounded-3xl shadow-xl ring-1 ring-white/40 md:block">
-            <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80"
-                 alt="Helping hands charity" class="h-full w-full object-cover" loading="lazy"/>
           </div>
           <div class="absolute top-6 -right-6 hidden rounded-2xl bg-white/85 p-4 shadow-lg shadow-blue-500/20 lg:flex lg:flex-col lg:gap-1">
             <span class="text-xs uppercase tracking-wide text-blue-600" data-i18n="hero_widget_title">Chiến dịch đang hoạt động</span>
@@ -250,7 +274,7 @@
 
         <div class="grid gap-6 md:grid-cols-3">
           <!-- Card 1 -->
-          <article class="group overflow-hidden rounded-3xl shadow-lg shadow-blue-500/10 ring-1 ring-white/60">
+          <!-- <article class="group overflow-hidden rounded-3xl shadow-lg shadow-blue-500/10 ring-1 ring-white/60">
             <div class="relative h-48">
               <img src="https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=1200&q=80"
                    alt="Pediatric patient support" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy"/>
@@ -259,17 +283,17 @@
             <div class="bg-white/85 px-5 py-4">
               <p class="text-sm text-slate-600" data-i18n="card1_text">Hỗ trợ chi phí điều trị khẩn cấp cho các bệnh nhân có hoàn cảnh khó khăn.</p>
             </div>
-          </article>
+          </article> -->
 
           <!-- Card 2 -->
           <article class="group overflow-hidden rounded-3xl shadow-lg shadow-blue-500/10 ring-1 ring-white/60">
             <div class="relative h-48">
-              <img src="https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=1200&q=80"
+              <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80"
                    alt="Oncology treatment support" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy"/>
-              <span class="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-600 shadow" data-i18n="card2_tag">Ung bướu</span>
+              <span class="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-600 shadow" data-i18n="card2_tag">Trẻ em</span>
             </div>
             <div class="bg-white/85 px-5 py-4">
-              <p class="text-sm text-slate-600" data-i18n="card2_text">Đồng hành cùng bệnh nhân ung thư trong các giai đoạn điều trị.</p>
+              <p class="text-sm text-slate-600" data-i18n="card2_text">Đồng hành cùng mầm non đất nước.</p>
             </div>
           </article>
 
@@ -297,11 +321,11 @@
         <i class="fas fa-times"></i>
       </button>
 
-      <h3 class="text-xl font-semibold text-slate-900 mb-4">Tài khoản</h3>
+      <!-- <h3 class="text-xl font-semibold text-slate-900 mb-4">Tài khoản</h3> -->
 
       <!-- Tabs -->
       <div class="tabs mb-5">
-        <button id="tabLogin" class="tab-btn active" onclick="switchAuthTab('login')">Đăng nhập</button>
+        <button type="button" id="tabLogin" class="tab-btn active" onclick="switchAuthTab('login')">Đăng nhập</button>
         <button id="tabSignup" class="tab-btn" onclick="switchAuthTab('signup')">Đăng ký</button>
       </div>
 
@@ -368,10 +392,10 @@
     const I18N = {
       vi: {
         brand_tag: "HOPE SEED",
-        brand_title: "Mảnh Vườn Hy Vọng",
-        not_logged: "Chưa đăng nhập",
+        brand_title: "Hệ thống quyên góp P2P",
+        // not_logged: "Chưa đăng nhập",
         logout: "Đăng xuất",
-        login: "Đăng nhập",
+        login: "Đăng nhập/Đăng ký",
         hero_h1: "Gieo một hạt giống – Nuôi dưỡng một sự sống",
         hero_p: "🌱 HopeSeed là nền tảng phi lợi nhuận kết nối cộng đồng với những bệnh nhân đang cần giúp đỡ tại các bệnh viện. Mọi người có thể quyên góp P2P minh bạch, công khai. Mỗi tấm lòng dù nhỏ bé cũng có thể tạo nên niềm hy vọng lớn lao cho người bệnh. Bạn có thể xem câu chuyện, quyên góp trực tiếp và theo dõi tiến trình hỗ trợ. Hoặc bạn có thể chính là cầu nối bệnh nhận với các nhà hảo tâm." ,
         cta_more: "Những mảnh đời yêu thương✨",
@@ -381,9 +405,9 @@
         hero_widget_note: "",
         section_tag: "Gợi ý gây quỹ",
         section_title: "Câu chuyện chung tay",
-        card1_tag: "Giọt Hy Vọng",
-        card1_text: "Hỗ trợ với Giọt Hy Vọng 💧",
-        card2_tag: "Ung bướu",
+        // card1_tag: "Giọt Hy Vọng",
+        // card1_text: "Hỗ trợ với Giọt Hy Vọng 💧",
+        card2_tag: "Trẻ em",
         card2_text: "Đồng hành cùng bệnh nhân ung thư trong các giai đoạn điều trị.",
         card3_tag: "Cấp cứu",
         card3_text: "Hỗ trợ khẩn cấp cho các ca cần can thiệp nhanh, kịp thời",
@@ -392,10 +416,10 @@
       },
       en: {
         brand_tag: "HOPE SEED",
-        brand_title: "Garden of Hope",
-        not_logged: "Not logged in",
+        brand_title: "P2P Donation Platform",
+        // not_logged: "Not logged in",
         logout: "Logout",
-        login: "Login",
+        login: "Login/Signup",
         hero_h1: "Plant a seed – Nurture a life",
         hero_p: "🌱 HopeSeed is a non-profit platform connecting the community with hospital patients in need. People can donate peer-to-peer with transparency. Every small act of kindness can grow into hope. Browse real stories, donate directly, and track progress openly or Be a connector of patient to our community",
         cta_more: "Hope Stories ✨",
@@ -405,9 +429,9 @@
         hero_widget_note: "",
         section_tag: "Suggested causes",
         section_title: "Stories that need your help",
-        card1_tag: "Precious Drops",
-        card1_text: "Support with your Precious Drops 💧",
-        card2_tag: "Oncology",
+        // card1_tag: "Precious Drops",
+        // card1_text: "Support with your Precious Drops 💧",
+        card2_tag: "Children",
         card2_text: "Stand by cancer patients through treatment stages.",
         card3_tag: "Emergency",
         card3_text: "Rapid aid for cases requiring urgent intervention",
