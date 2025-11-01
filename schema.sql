@@ -1,137 +1,206 @@
--- Quy ước chung
-CREATE EXTENSION IF NOT EXISTS citext;            -- để email case-insensitive
+-- schema.sql - TrueLand Database Schema with Migration
 
--- Danh mục
-CREATE TABLE regions (
-  region_id   SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  name        VARCHAR(100) NOT NULL UNIQUE
+-- =========================
+-- 1. USERS TABLE
+-- =========================
+CREATE TABLE IF NOT EXISTS users (
+    user_id SERIAL PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    phone TEXT,
+    is_admin BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE hospitals (
-  hospital_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  name        VARCHAR(200) NOT NULL,
-  region_id   SMALLINT NOT NULL REFERENCES regions(region_id),
-  address     VARCHAR(255),
-  hospital_url TEXT,
-  hospital_bank_account1 TEXT,
-  hospital_bank1 TEXT,
-  hospital_bank_account2 TEXT,
-  hospital_bank2 TEXT
+-- Seed test users
+INSERT INTO users (email, password_hash, phone, is_admin)
+VALUES 
+  ('tester1@gmail.com', 'dummyhash', NULL, FALSE),
+  ('tester2@gmail.com', 'dummyhash', NULL, FALSE)
+ON CONFLICT (email) DO NOTHING;
+
+-- =========================
+-- 2. USER_IMAGE TABLE
+-- =========================
+CREATE TABLE IF NOT EXISTS user_image (
+    id SERIAL PRIMARY KEY,
+    image_id TEXT NOT NULL,
+    image_role TEXT,
+    listing_id INTEGER,  -- FK added later
+    asset_id TEXT,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    create_date TIMESTAMP DEFAULT NOW()
 );
 
--- Bệnh nhân / người ủng hộ / người gây quỹ
-CREATE TABLE patients (
-  patient_id  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  full_name   VARCHAR(150),
-  phone       VARCHAR(50) UNIQUE,
-  created_at  TIMESTAMP NOT NULL DEFAULT NOW()
+CREATE INDEX IF NOT EXISTS idx_user_image_user_id ON user_image(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_image_image_id ON user_image(image_id);
+
+-- Seed sample images
+INSERT INTO user_image (image_id, image_role, listing_id, asset_id, user_id, create_date)
+VALUES 
+    ('header', 'header', NULL, '4', (SELECT user_id FROM users WHERE email='tester1@gmail.com'), '2025-01-10'),
+    ('header', 'header', NULL, '2', (SELECT user_id FROM users WHERE email='tester2@gmail.com'), '2025-01-10')
+ON CONFLICT DO NOTHING;
+
+-- =========================
+-- 3. LISTINGS TABLE (with indexes)
+-- =========================
+CREATE TABLE IF NOT EXISTS listings (
+    listing_id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    listing_type TEXT NOT NULL,
+    asset_type TEXT NOT NULL,
+    asset_subtype TEXT NOT NULL,
+    asset_legaltype TEXT NOT NULL,
+    price NUMERIC(18,2),
+    square NUMERIC(10,2),
+    province TEXT NOT NULL,
+    city TEXT NOT NULL,
+    district TEXT NOT NULL,
+    main_street TEXT,
+    main_street_width NUMERIC(5,2),
+    alley BOOLEAN DEFAULT FALSE,
+    alley_width NUMERIC(5,2),
+    mattien BOOLEAN DEFAULT FALSE,
+    google_map_id TEXT,
+    thua_dat_id NUMERIC,
+    to_ban_do_id NUMERIC,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    status TEXT DEFAULT 'active'
 );
 
-CREATE TABLE users (
-  users_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  email         TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  phone         VARCHAR(50) UNIQUE,
-  created_at    TIMESTAMP NOT NULL DEFAULT NOW()
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_listings_listing_type ON listings(listing_type);
+CREATE INDEX IF NOT EXISTS idx_listings_asset_type ON listings(asset_type);
+CREATE INDEX IF NOT EXISTS idx_listings_asset_subtype ON listings(asset_subtype);
+CREATE INDEX IF NOT EXISTS idx_listings_province ON listings(province);
+CREATE INDEX IF NOT EXISTS idx_listings_district ON listings(district);
+CREATE INDEX IF NOT EXISTS idx_listings_status ON listings(status);
+CREATE INDEX IF NOT EXISTS idx_listings_created_at ON listings(created_at);
+CREATE INDEX IF NOT EXISTS idx_listings_mattien ON listings(mattien);
+CREATE INDEX IF NOT EXISTS idx_listings_alley ON listings(alley);
+CREATE INDEX IF NOT EXISTS idx_listings_price ON listings(price);
+
+-- Composite indexes for common queries
+CREATE INDEX IF NOT EXISTS idx_listings_type_status ON listings(listing_type, status);
+CREATE INDEX IF NOT EXISTS idx_listings_province_district ON listings(province, district);
+CREATE INDEX IF NOT EXISTS idx_listings_asset_type_subtype ON listings(asset_type, asset_subtype);
+
+-- Seed sample listings
+INSERT INTO listings 
+(title, description, listing_type, asset_type, asset_subtype, asset_legaltype, price, square, 
+ province, city, district, main_street, main_street_width, alley, alley_width, mattien, 
+ google_map_id, thua_dat_id, to_ban_do_id, user_id, status)
+VALUES
+('Căn hộ Masteri Thảo Điền 2PN',
+  'Căn hộ view sông, full nội thất, tầng cao.',
+  'Bán', 'Căn hộ', '2PN', 'Sổ hồng', 5800000000, 68.5, 
+  'TP.HCM', 'Thành phố Thủ Đức', 'Phường Thảo Điền', 'Nguyễn Văn Hưởng', 
+  12.0, FALSE, NULL, TRUE, 'ChIJJ1YqkJQvdTER1sOz_1gMZ3I', 
+  1123, 24,
+  (SELECT user_id FROM users WHERE email='tester2@gmail.com'),
+  'active'),
+
+('Nhà mặt tiền quận 5', 
+  'Nhà 3 tầng, vị trí kinh doanh đắc địa, gần chợ Kim Biên.', 
+  'Bán', 'Nhà', 'Nhà mặt tiền', 'Hợp đồng sang tên', 11500000000, 
+  92.0, 'TP.HCM', 'Quận 5', 'Phường 2', 'Trần Hưng Đạo', 14.0, 
+  FALSE, NULL, TRUE, 'ChIJ5aBLplQudTERPwF4lA_vhkk', 221, 18,
+  (SELECT user_id FROM users WHERE email='tester1@gmail.com'),
+  'active')
+ON CONFLICT DO NOTHING;
+
+-- =========================
+-- 4. SERVICES TABLE - ✅ UPDATED WITH MIGRATION
+-- =========================
+CREATE TABLE IF NOT EXISTS services (
+    id SERIAL PRIMARY KEY,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,           -- ✅ ADDED
+    description TEXT,
+    provider TEXT,
+    contact TEXT,                  -- ✅ ADDED
+    listing_id INTEGER REFERENCES listings(listing_id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
--- CREATE TABLE donors (
---   donor_id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
---   email         TEXT UNIQUE NOT NULL,
---   password_hash TEXT NOT NULL,
---   phone         VARCHAR(50) UNIQUE,
---   created_at    TIMESTAMP NOT NULL DEFAULT NOW()
--- );
+CREATE INDEX IF NOT EXISTS idx_services_type ON services(type);
+CREATE INDEX IF NOT EXISTS idx_services_listing_id ON services(listing_id);
 
--- CREATE TABLE campaign_owners (
---   fundraiser_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
---   email         TEXT UNIQUE NOT NULL,
---   password_hash TEXT NOT NULL,
---   phone         VARCHAR(50) UNIQUE,
---   role          VARCHAR(30) DEFAULT 'fundraiser',
---   created_at    TIMESTAMP NOT NULL DEFAULT NOW()
--- );
+-- ✅ MIGRATION: Add missing columns if they don't exist
+DO $$ 
+BEGIN
+    -- Add title column if not exists
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name='services' AND column_name='title'
+    ) THEN
+        ALTER TABLE services ADD COLUMN title TEXT;
+        
+        -- Set default values for existing records
+        UPDATE services SET title = type WHERE title IS NULL;
+        
+        -- Make it NOT NULL after setting defaults
+        ALTER TABLE services ALTER COLUMN title SET NOT NULL;
+    END IF;
+    
+    -- Add contact column if not exists
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name='services' AND column_name='contact'
+    ) THEN
+        ALTER TABLE services ADD COLUMN contact TEXT;
+    END IF;
+END $$;
 
--- Hóa đơn chi tiết tại bệnh viện (tùy chọn)
-CREATE TABLE patient_bills (
-  patient_bill_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  patient_id      BIGINT NOT NULL REFERENCES patients(patient_id),
-  hospital_id     BIGINT NOT NULL REFERENCES hospitals(hospital_id),
-  hospital_patient_code VARCHAR(100),           -- mã bệnh viện cấp cho bệnh nhân
-  bed_no         VARCHAR(30),
-  total_amount   NUMERIC(15,2) CHECK (total_amount >= 0),
-  currency       VARCHAR(3) DEFAULT 'VND',
-  issued_at      DATE,
-  raw_document   JSONB                           -- lưu cấu trúc bill nếu có
-);
+-- Seed sample services
+INSERT INTO services (type, title, description, provider, contact)
+VALUES
+  ('finance', 'Tư vấn vay mua nhà', 'Ước tính hạn mức, lãi suất, phương án trả nợ.', 'REAL Finance Desk', 'tel:+84901234567'),
+  ('lawyer', 'Kiểm tra pháp lý BĐS', 'Rà soát hồ sơ, quy hoạch, tranh chấp.', 'REAL Legal Hub', 'mailto:legal@trueland.vn'),
+  ('broker', 'Môi giới freelancer', 'Đăng tin, dẫn khách, hỗ trợ công chứng.', 'REAL Broker Network', 'tel:+84907654321')
+ON CONFLICT DO NOTHING;
 
--- Media/Document gắn với chiến dịch
-CREATE TABLE media (
-  media_id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  kind         VARCHAR(30) NOT NULL,            -- 'image','video','doc'
-  url          TEXT NOT NULL,
-  title        VARCHAR(200),
-  metadata     JSONB,
-  created_at   TIMESTAMP NOT NULL DEFAULT NOW()
-);
+-- =========================
+-- 5. ENABLE UNACCENT EXTENSION (for accent-insensitive search)
+-- =========================
+CREATE EXTENSION IF NOT EXISTS unaccent;
 
--- Ticket kêu gọi quyên góp
-CREATE TYPE ticket_status AS ENUM ('draft','published','funding','funded','closed','rejected');
-CREATE TABLE raise_tickets (
-  raise_ticket_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  patient_id      BIGINT NOT NULL REFERENCES patients(patient_id),
-  fundraiser_id   BIGINT NOT NULL REFERENCES campaign_owners(fundraiser_id),
-  hospital_id     BIGINT NOT NULL REFERENCES hospitals(hospital_id),
-  main_type       VARCHAR(100) NOT NULL,         -- vd: 'chữa bệnh'
-  sub_type        VARCHAR(100),
-  unit_price      NUMERIC(15,2) CHECK (unit_price >= 0),         -- 1 unit = 100,000đ chẳng hạn
-  total_price_need NUMERIC(15,2) CHECK (total_price_need >= 0),
-  total_unit_need NUMERIC(15,2) GENERATED ALWAYS AS ( 
-      CASE WHEN unit_price IS NOT NULL AND unit_price > 0 
-           THEN total_price_need / unit_price 
-           ELSE NULL END) STORED,
-  finish_unit     NUMERIC(15,2) DEFAULT 0 CHECK (finish_unit >= 0),
-  start_date      DATE DEFAULT CURRENT_DATE,
-  description     TEXT,
-  status          ticket_status NOT NULL DEFAULT 'draft',
-  patient_bill_id BIGINT REFERENCES patient_bills(patient_bill_id),
-  document_folder_id BIGINT REFERENCES media(media_id),           -- nếu dùng 1 record trỏ tới folder
-  video_url       TEXT,
-  video_thanks_url TEXT,
-  created_by_id   BIGINT REFERENCES campaign_owners(fundraiser_id),   -- người tạo (có thể = fundraiser_id)
-  updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
-  created_at      TIMESTAMP NOT NULL DEFAULT NOW()
-);
+-- =========================
+-- 6. ANALYZE TABLES (update statistics)
+-- =========================
+ANALYZE users;
+ANALYZE listings;
+ANALYZE services;
+ANALYZE user_image;
 
-CREATE INDEX idx_raise_ticket_status ON raise_tickets(status);
-CREATE INDEX idx_raise_ticket_patient ON raise_tickets(patient_id);
+-- =========================
+-- 7. ADMIN USER (optional - for testing)
+-- =========================
+-- Password: admin123 (hashed with bcrypt)
+INSERT INTO users (email, password_hash, is_admin)
+VALUES ('admin@trueland.vn', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5TD0YZMQvcu1y', TRUE)
+ON CONFLICT (email) DO NOTHING;
 
--- Lịch sử cập nhật (minh bạch)
-CREATE TABLE ticket_updates (
-  update_id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  raise_ticket_id BIGINT NOT NULL REFERENCES raise_tickets(raise_ticket_id) ON DELETE CASCADE,
-  content         TEXT NOT NULL,
-  created_by      BIGINT REFERENCES campaign_owners(fundraiser_id),
-  created_at      TIMESTAMP NOT NULL DEFAULT NOW()
-);
+-- =========================
+-- VERIFICATION QUERIES
+-- =========================
+-- Check if migration was successful
+SELECT 
+    table_name,
+    column_name,
+    data_type,
+    is_nullable
+FROM information_schema.columns
+WHERE table_schema = 'public' 
+  AND table_name = 'services'
+ORDER BY ordinal_position;
 
--- Quyên góp
-CREATE TYPE payment_status AS ENUM ('initiated','paid','failed','refunded');
-CREATE TABLE donate_tickets (
-  donate_ticket_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  donor_id         BIGINT NOT NULL REFERENCES donors(donor_id) ON DELETE RESTRICT,
-  raise_ticket_id  BIGINT NOT NULL REFERENCES raise_tickets(raise_ticket_id) ON DELETE CASCADE,
-  patient_id       BIGINT NOT NULL REFERENCES patients(patient_id),
-  amount           NUMERIC(15,2) NOT NULL CHECK (amount > 0),
-  currency         VARCHAR(3) NOT NULL DEFAULT 'VND',
-  provider         VARCHAR(50),                   -- VNPay/Momo/Stripe...
-  provider_txn_id  VARCHAR(100),                  -- để đối soát
-  status           payment_status NOT NULL DEFAULT 'initiated',
-  paid_at          TIMESTAMP,
-  raw_response     JSONB,
-  created_at       TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_donate_ticket_ticket ON donate_tickets(raise_ticket_id);
-CREATE INDEX idx_donate_ticket_donor ON donate_tickets(donor_id);
-CREATE INDEX idx_donate_ticket_status ON donate_tickets(status);
+-- Count records
+SELECT 
+    (SELECT COUNT(*) FROM users) as users_count,
+    (SELECT COUNT(*) FROM listings) as listings_count,
+    (SELECT COUNT(*) FROM services) as services_count,
+    (SELECT COUNT(*) FROM user_image) as images_count;

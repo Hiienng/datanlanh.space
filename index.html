@@ -1,178 +1,57 @@
-<script type="text/javascript">
-  window.HOPESEED_API_BASE = 'https://hopeseed.onrender.com';
-  // --- HTTP helper dùng chung (toàn cục) ---
-  window.httpPost = async function(url, body){
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (!res.ok) {
-      let msg = `HTTP ${res.status} ${res.statusText}`;
-      try { const j = await res.json(); if (j && j.detail) msg = j.detail; } catch {}
-      throw new Error(msg);
-    }
-    return res.json();
-  };
-  /* === XLSX helpers (nếu bạn dùng) === */
-  var gk_isXlsx = false;
-  var gk_xlsxFileLookup = {};
-  var gk_fileData = {};
-  function filledCell(cell) { return cell !== '' && cell != null; }
-  function loadFileData(filename) {
-    if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-      try {
-        var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-        var firstSheetName = workbook.SheetNames[0];
-        var worksheet = workbook.Sheets[firstSheetName];
-        var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-        var filteredData = jsonData.filter(row => row.some(filledCell));
-        var headerRowIndex = filteredData.findIndex((row, index) =>
-          row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-        );
-        if (headerRowIndex === -1 || headerRowIndex > 25) headerRowIndex = 0;
-        var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
-        csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-        return csv;
-      } catch (e) { console.error(e); return ""; }
-    }
-    return gk_fileData[filename] || "";
-  }
-</script>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>HopeSeed</title>
+  <title>R.E.A.L</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Pacifico&family=Style+Script&display=swap&subset=vietnamese" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxuvwv/b4jzlGC62Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="icon" href="https://ik.imagekit.io/o2u9hny2s/hopeseed/LOGO8.png" type="image/png">
-
-  <style>
-    :root {
-      color-scheme: light;
-      --accent: #34b3d3;
-      --accent-strong: #0284c7;
-      --accent-dark: #1e3a8a;
-      --accent-soft: rgba(2, 132, 199, 0.12);
-      --card-bg: #f0f9ff;
-      --card-border: rgba(2, 132, 199, 0.2);
-
-      --lh-tight: 1.15;
-      --lh-normal: 1.6;
-    }
-    html, body { width: 100%; overflow-x: hidden; }
-    body{
-      font-family: 'Plus Jakarta Sans','Inter','Be Vietnam Pro','Noto Sans','Segoe UI',system-ui,-apple-system,sans-serif;
-      -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-      font-kerning: normal; font-feature-settings: "liga","calt","ss01","cv05";
-      background: linear-gradient(125deg, #e0f2fe 0%, #bae6fd 45%, #ffffff 100%); color: #083344;
-    }
-    .glass-card {
-      background: rgba(240, 249, 255, 0.94);
-      backdrop-filter: blur(22px);
-      border: 1px solid var(--card-border);
-      box-shadow: 0 28px 55px -28px rgba(2, 132, 199, 0.35);
-    }
-    .glass-card--transparent{
-      background: transparent; backdrop-filter: none;
-      border: 1px solid var(--card-border);
-      box-shadow: 0 28px 55px -28px rgba(2,132,199,0.35);
-    }
-    .glass-frame{ position: relative; border-radius: 32px; overflow: hidden; box-shadow: 0 28px 55px -28px rgba(2,132,199,0.35); }
-    .glass-frame::before{ content:""; position:absolute; inset:0; border-radius:inherit; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6); pointer-events:none; }
-
-    .hero-glow {
-      position: absolute; inset: auto -12rem -6rem auto;
-      width: 28rem; height: 28rem;
-      background: radial-gradient(circle at center, rgba(2, 132, 199, 0.45), transparent 65%);
-      opacity: 0.75;
-    }
-    .dashboard-backdrop { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-    .dashboard-backdrop div { position: absolute; border-radius: 9999px; filter: blur(120px); opacity: 0.65; }
-    .dashboard-backdrop div:nth-child(1){ width:540px; height:540px; background: rgba(2,132,199,.32); top:-120px; left:-140px;}
-    .dashboard-backdrop div:nth-child(2){ width:480px; height:480px; background: rgba(125,211,252,.28); bottom:-160px; right:-120px;}
-    .dashboard-backdrop div:nth-child(3){ width:380px; height:380px; background: rgba(147,197,253,.24); top:38%; right:28%;}
-
-    .bg-blue-500 { background-color: var(--accent) !important; }
-    .hover\:bg-blue-600:hover { background-color: var(--accent-dark) !important; }
-    .bg-blue-50 { background-color: var(--accent-soft) !important; }
-    .text-blue-600 { color: var(--accent-strong) !important; }
-    .text-blue-700 { color: var(--accent-dark) !important; }
-    .border-blue-200 { border-color: rgba(2,132,199,.42) !important; }
-    .border-blue-200\/60 { border-color: rgba(2,132,199,.28) !important; }
-    .border-blue-100\/60 { border-color: rgba(2,132,199,.18) !important; }
-    .border-blue-600 { border-color: var(--accent-strong) !important; }
-    .ring-blue-200 { --tw-ring-color: rgba(2,132,199,.28) !important; }
-    .ring-blue-100 { --tw-ring-color: rgba(2,132,199,.18) !important; }
-    .shadow-blue-500\/40 { box-shadow: 0 18px 48px rgba(2,132,199,.32) !important; }
-    .shadow-blue-500\/30 { box-shadow: 0 18px 42px rgba(2,132,199,.24) !important; }
-    .shadow-blue-500\/20 { box-shadow: 0 12px 28px rgba(2,132,199,.18) !important; }
-    .hover\:bg-blue-50:hover { background-color: rgba(2,132,199,.12) !important; }
-    .focus\:border-blue-400:focus { border-color: rgba(2,132,199,.7) !important; box-shadow: 0 0 0 3px rgba(2,132,199,.2); }
-    .focus\:ring-blue-100:focus { --tw-ring-color: rgba(2,132,199,.25) !important; }
-
-    /* Slide panel */
-    #loginPanel{ will-change: transform; }
-    .slide-in { transform: translateX(0); transition: transform .32s cubic-bezier(.2,.8,.2,1); }
-    .slide-out{ transform: translateX(100%); transition: transform .28s cubic-bezier(.4,0,.2,1); }
-
-    /* Overlay */
-    .overlay{ position:fixed; inset:0; background:rgba(15,23,42,.35); backdrop-filter:saturate(120%) blur(2px);
-      opacity:0; pointer-events:none; transition: opacity .22s ease; z-index:49; }
-    .overlay.show{ opacity:1; pointer-events:auto; }
-
-    /* Tabs */
-    .tabs{ display:flex; gap:8px; border-radius:9999px; background:#f1f5f9; padding:4px; }
-    .tab-btn{ flex:1; padding:8px 12px; border-radius:9999px; font-weight:600; font-size:14px; color:#334155; }
-    .tab-btn.active{ background:#fff; color:#0f172a; box-shadow: 0 6px 18px rgba(2,132,199,.12); }
-
-    /* Eye icon */
-    .eye-btn{ position:absolute; right:10px; top:50%; transform: translateY(-50%); color:#64748b; }
-    .eye-btn:hover{ color:#334155; }
-
-    /* Loading state */
-    .btn-loading{ position:relative; pointer-events:none; opacity:.8; }
-    .btn-loading::after{
-      content:""; position:absolute; right:14px; top:50%; transform: translateY(-50%);
-      width:16px; height:16px; border:2px solid rgba(255,255,255,.6); border-top-color:#fff; border-radius:50%;
-      animation:spin .8s linear infinite;
-    }
-    @keyframes spin{ to{ transform: translateY(-50%) rotate(360deg);} }
-
-    /* FAB */
-    .fab-wrap{ position: fixed; right: 18px; bottom: 18px; z-index: 60; }
-    .fab-main{
-      height:56px; width:56px; border-radius:9999px; display:flex; align-items:center; justify-content:center;
-      background: var(--accent); color:#fff; box-shadow: 0 14px 30px rgba(2,132,199,.28);
-      transition: transform .2s ease, box-shadow .2s ease;
-    }
-    .fab-main:hover{ transform: translateY(-2px); box-shadow: 0 20px 40px rgba(2,132,199,.34); }
-    .fab-tray{
-      position:absolute; right:66px; bottom:0; display:flex; gap:10px; pointer-events:none;
-      transform: translateX(20px); opacity:0; transition: transform .25s ease, opacity .25s ease;
-    }
-    .fab-wrap.open .fab-tray{ transform: translateX(0); opacity:1; pointer-events:auto; }
-    .fab-btn{
-      border-radius:9999px; padding:10px 14px; font-weight:600; font-size:14px;
-      background:#fff; color: var(--accent-strong); border:1px solid var(--card-border);
-      box-shadow: 0 10px 26px rgba(2,132,199,.14);
-      transition: transform .2s ease, background .2s ease; white-space: nowrap;
-    }
-    .fab-btn:hover{ background:#f8fbff; transform: translateY(-1px); }
-    .btn-flat {
-      background-color: #3788bb;   /* màu mặc định */
-      color: #fff;
-      transition: all 0.25s ease;
+  <link rel="icon" href="https://ik.imagekit.io/o2u9hny2s/trueland/trueland_icon.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script type="text/javascript">
+    window.API_BASE = 'https://trueland.onrender.com';
+    window.API_BASE = 'http://127.0.0.1:8000';
+    // --- HTTP helper dùng chung (toàn cục) ---
+    window.httpPost = async function(url, body){
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        let msg = `HTTP ${res.status} ${res.statusText}`;
+        try { const j = await res.json(); if (j && j.detail) msg = j.detail; } catch {}
+        throw new Error(msg);
       }
-      .btn-flat:hover {
-        background-color: #120747;  /* màu hover */
+      return res.json();
+    };
+    /* === XLSX helpers (nếu bạn dùng) === */
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) { return cell !== '' && cell != null; }
+    function loadFileData(filename) {
+      if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+        try {
+          var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+          var firstSheetName = workbook.SheetNames[0];
+          var worksheet = workbook.Sheets[firstSheetName];
+          var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+          var filteredData = jsonData.filter(row => row.some(filledCell));
+          var headerRowIndex = filteredData.findIndex((row, index) =>
+            row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+          );
+          if (headerRowIndex === -1 || headerRowIndex > 25) headerRowIndex = 0;
+          var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+          csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+          return csv;
+        } catch (e) { console.error(e); return ""; }
       }
-  </style>
+      return gk_fileData[filename] || "";
+    }
+  </script>
 </head>
 
 <body class="relative text-slate-700">
@@ -187,20 +66,19 @@
       <div class="glass-card rounded-3xl px-6 py-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <a href="index.html" class="flex items-center gap-3">
           <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl">
-                <img src="https://ik.imagekit.io/o2u9hny2s/hopeseed/LOGO8.png"
+                <img src="https://ik.imagekit.io/o2u9hny2s/trueland/trueland_icon.png"
                  alt="logo" class="h-full w-full object-contain bg-transparent" loading="lazy"/>
           </span>
           <div>
-            <p class="text-xs uppercase tracking-[0.35em] text-black-700" data-i18n="brand_tag">HopeSeed</p>
-            <p class="text-base font-semibold text-slate-900" data-i18n="brand_title">Hệ thống quyên góp P2P </p>
+            <p class="text-xs uppercase tracking-[0.35em] text-black-700" data-i18n="brand_tag">R.E.A.L</p>
+            <p class="text-base font-semibold text-slate-900" data-i18n="brand_title">Sàn giao dịch P2P</p>
           </div>
         </a>
-
         <div class="flex flex-wrap items-center gap-3 text-sm">
           <button id="langBtn" class="rounded-full border border-blue-200/60 bg-white/70 px-3 py-1 text-blue-700 hover:bg-blue-50 transition" title="Switch language">EN / VI</button>
           <!-- <span id="userInfo" class="rounded-full bg-blue-50 px-3 py-1 text-blue-700 border border-blue-200/60" data-i18n="not_logged">Chưa đăng nhập</span> -->
-          <button id="logoutBtn" class="hidden rounded-full border border-red-200 px-3 py-1 text-red-600 transition hover:bg-red-50">
-            <i class="fas fa-sign-out-alt mr-1"></i><span data-i18n="logout">Đăng xuất</span>
+          <button id="accountBtn" class="hidden rounded-full border border-blue-200/60 bg-white/70 px-3 py-1 text-blue-700 transition hover:bg-blue-50">
+            <i class="fas fa-user mr-1"></i><span>Account</span>
           </button>
           <button id="loginToggleBtn" class="rounded-full bg-slate-900 px-4 py-2 text-white transition hover:bg-slate-800 shadow-lg shadow-slate-900/20">
             <i class="fas fa-sign-in-alt mr-1"></i><span data-i18n="login">Đăng nhập/Đăng ký</span>
@@ -208,26 +86,19 @@
         </div>
       </div>
     </nav>
-
     <!-- HERO -->
     <header class="max-w-6xl mx-auto px-6 pt-12">
       <div class="grid gap-12 lg:grid-cols-[1.05fr,0.95fr] items-center">
         <div class="space-y-6">
-          <span class="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1 text-sm font-medium text-blue-600 shadow-sm ring-1 ring-blue-200">#hopeseed</span>
-          <h2 class="text-4xl sm:text-5xl font-normal leading-snug text-slate-800 font-[Pacifico]" data-i18n="hero_h1">
-            Gieo một hạt giống – Nuôi dưỡng một sự sống
-          </h2>
-
-          <p class="text-base text-slate-600/90 leading-7 max-w-xl" data-i18n="hero_p">
-            🌱 HopeSeed là nền tảng phi lợi nhuận kết nối cộng đồng với những bệnh nhân đang cần giúp đỡ tại các bệnh viện. Mọi người có thể quyên góp P2P minh bạch, công khai. 
-            Mỗi tấm lòng dù nhỏ bé cũng có thể tạo nên niềm hy vọng lớn lao cho người bệnh. 
-            Bạn có thể xem câu chuyện, quyên góp trực tiếp và theo dõi tiến trình hỗ trợ. 
-            Hoặc bạn có thể chính là cầu nối bệnh nhận với các nhà hảo tâm.
-          </p>
+          <span class="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1 text-sm font-medium text-blue-600 shadow-sm ring-1 ring-blue-200">#real</span>
+          <span class="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1 text-sm font-medium text-blue-600 shadow-sm ring-1 ring-blue-200">#accountability</span>
+            <h2 class="text-5xl md:text-6xl font-bold text-left leading-tight tracking-wider text-[#1e3a8a] font-['Playfair_Display'] drop-shadow-sm" data-i18n="hero_h1">  </h2>
+          <span class="block text-lg text-left text-slate-600" data-i18n="hero_p">Nền tảng giao dịch bất động sản P2P minh bạch, an toàn và hiệu quả</span>  
+          </span>
           <div class="flex flex-wrap items-center gap-3">
           <button type="button"
             class="btn-flat rounded-full px-6 py-3 font-medium shadow-lg transition hover:-translate-y-0.5"
-            onclick="window.location.href='hopestories.html'">
+            onclick="window.location.href='galleries.html'">
             <i class="fas fa-hand-holding-heart mr-1"></i>
             <span data-i18n="cta_more">Xem các câu chuyện hy vọng ✨</span>
           </button>
@@ -261,51 +132,51 @@
       </div>
     </header>
 
-    <!-- STORIES -->
+    <!-- Công cụ -->
     <section class="max-w-6xl mx-auto px-6 mt-14">
       <div class="glass-card rounded-3xl p-6 md:p-8 space-y-6">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h3 class="text-2xl font-light tracking-wide leading-snug text-slate-800 font-[Sora]" data-i18n="section_title">
-              Câu chuyện cần chung tay
+            <h3 class="text-2xl font-bold tracking-wide leading-snug text-slate-700 font-[Sono]" data-i18n="section_title">
+              Công cụ trọng tâm của R.E.A.L
             </h3>
           </div>
         </div>
 
         <div class="grid gap-6 md:grid-cols-3">
-          <!-- Card 1 -->
-          <!-- <article class="group overflow-hidden rounded-3xl shadow-lg shadow-blue-500/10 ring-1 ring-white/60">
-            <div class="relative h-48">
-              <img src="https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=1200&q=80"
-                   alt="Pediatric patient support" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy"/>
-              <span class="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-600 shadow" data-i18n="card1_tag">Trường hợp khẩn</span>
-            </div>
-            <div class="bg-white/85 px-5 py-4">
-              <p class="text-sm text-slate-600" data-i18n="card1_text">Hỗ trợ chi phí điều trị khẩn cấp cho các bệnh nhân có hoàn cảnh khó khăn.</p>
-            </div>
-          </article> -->
-
-          <!-- Card 2 -->
+          <!-- Card 1: Định giá tham chiếu -->
           <article class="group overflow-hidden rounded-3xl shadow-lg shadow-blue-500/10 ring-1 ring-white/60">
             <div class="relative h-48">
-              <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80"
-                   alt="Oncology treatment support" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy"/>
-              <span class="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-600 shadow" data-i18n="card2_tag">Trẻ em</span>
+              <img src="https://images.unsplash.com/photo-1532960401447-7dd05bef36a6?auto=format&fit=crop&w=1200&q=80"
+                   alt="Reference pricing" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy"/>
+              <span class="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-600 shadow" data-i18n="card1_tag">Định giá tham chiếu</span>
             </div>
             <div class="bg-white/85 px-5 py-4">
-              <p class="text-sm text-slate-600" data-i18n="card2_text">Đồng hành cùng mầm non đất nước.</p>
+              <p class="text-sm text-slate-600" data-i18n="card1_text">Xem biên giá theo khu vực, dữ liệu giao dịch gần và lịch sử biến động.</p>
             </div>
           </article>
 
-          <!-- Card 3 -->
+          <!-- Card 2: Tự đăng & bán P2P -->
           <article class="group overflow-hidden rounded-3xl shadow-lg shadow-blue-500/10 ring-1 ring-white/60">
             <div class="relative h-48">
-              <img src="https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?auto=format&fit=crop&w=1200&q=80"
-                   alt="Emergency care relief" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy"/>
-              <span class="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-600 shadow" data-i18n="card3_tag">Cấp cứu</span>
+              <img src="https://images.unsplash.com/photo-1515542622106-78bda8ba0e5a?auto=format&fit=crop&w=1200&q=80"
+                   alt="P2P listing" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy"/>
+              <span class="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-600 shadow" data-i18n="card2_tag">Tự đăng & bán P2P</span>
             </div>
             <div class="bg-white/85 px-5 py-4">
-              <p class="text-sm text-slate-600" data-i18n="card3_text">Hỗ trợ khẩn cấp cho các ca cần can thiệp nhanh, kịp thời.</p>
+              <p class="text-sm text-slate-600" data-i18n="card2_text">Người bán tự định giá, tự rao; người mua liên hệ trực tiếp, minh bạch quy trình.</p>
+            </div>
+          </article>
+
+          <!-- Card 3: Hỗ trợ pháp lý & môi giới -->
+          <article class="group overflow-hidden rounded-3xl shadow-lg shadow-blue-500/10 ring-1 ring-white/60">
+            <div class="relative h-48">
+              <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=80"
+                   alt="Legal & freelance brokers" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy"/>
+              <span class="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-600 shadow" data-i18n="card3_tag">Pháp lý & Môi giới</span>
+            </div>
+            <div class="bg-white/85 px-5 py-4">
+              <p class="text-sm text-slate-600" data-i18n="card3_text">AI/luật sư hỗ trợ thủ tục; thuê môi giới freelancer theo nhu cầu thực.</p>
             </div>
           </article>
         </div>
@@ -391,52 +262,62 @@
     // ====== SIMPLE i18n ======
     const I18N = {
       vi: {
-        brand_tag: "HOPE SEED",
-        brand_title: "Hệ thống quyên góp P2P",
-        // not_logged: "Chưa đăng nhập",
+        brand_tag: "R.E.A.L",
+        brand_title: "Sàn BĐS minh bạch P2P",
         logout: "Đăng xuất",
         login: "Đăng nhập/Đăng ký",
-        hero_h1: "Gieo một hạt giống – Nuôi dưỡng một sự sống",
-        hero_p: "🌱 HopeSeed là nền tảng phi lợi nhuận kết nối cộng đồng với những bệnh nhân đang cần giúp đỡ tại các bệnh viện. Mọi người có thể quyên góp P2P minh bạch, công khai. Mỗi tấm lòng dù nhỏ bé cũng có thể tạo nên niềm hy vọng lớn lao cho người bệnh. Bạn có thể xem câu chuyện, quyên góp trực tiếp và theo dõi tiến trình hỗ trợ. Hoặc bạn có thể chính là cầu nối bệnh nhận với các nhà hảo tâm." ,
-        cta_more: "Những mảnh đời yêu thương✨",
-        stat_donors_label: "Người ủng hộ đang sẵn sàng",
-        stat_fund_label: "Chiến dịch tin cậy",
-        hero_widget_title: "Chiến dịch đang hoạt động",
-        hero_widget_note: "",
-        section_tag: "Gợi ý gây quỹ",
-        section_title: "Câu chuyện chung tay",
-        // card1_tag: "Giọt Hy Vọng",
-        // card1_text: "Hỗ trợ với Giọt Hy Vọng 💧",
-        card2_tag: "Trẻ em",
-        card2_text: "Đồng hành cùng bệnh nhân ung thư trong các giai đoạn điều trị.",
-        card3_tag: "Cấp cứu",
-        card3_text: "Hỗ trợ khẩn cấp cho các ca cần can thiệp nhanh, kịp thời",
+        tab_login: "Đăng nhập",
+        tab_signup: "Đăng ký",
+        hero_h1: "Real Estate Accountability Layer",
+        hero_p: "R.E.A.L là hệ thống BĐS ngang hàng (P2P) nơi người bán tự định giá dựa trên dữ liệu tham chiếu khu vực, tự đăng tin, và kết nối trực tiếp người mua. Nền tảng hỗ trợ môi giới freelancer, tư vấn pháp lý bởi AI/kết nối luật sư, góp phần hình thành thị trường giá lành mạnh và theo dõi giá thật.",
+        cta_more: "Khám phá BĐS đang mở bán",
+        stat_donors_label: "Người dùng đang hoạt động",
+        stat_fund_label: "BĐS đang mở bán",
+        hero_widget_title: "Giá tham chiếu khu vực",
+        hero_widget_note: "Cập nhật theo giao dịch gần đây",
+        section_title: "Công cụ trọng tâm của R.E.A.L",
+        card1_tag: "Định giá tham chiếu",
+        card1_text: "Xem biên giá theo khu vực, dữ liệu giao dịch gần và lịch sử biến động.",
+        card2_tag: "Tự đăng & bán P2P",
+        card2_text: "Người bán tự định giá, tự rao; người mua liên hệ trực tiếp, minh bạch quy trình.",
+        card3_tag: "Pháp lý & Môi giới",
+        card3_text: "AI/luật sư hỗ trợ thủ tục; thuê môi giới freelancer theo nhu cầu thực.",
         email: "Email",
-        password: "Mật khẩu"
+        password: "Mật khẩu",
+        phone_optional: "Số điện thoại (tuỳ chọn)",
+        remember_me: "Ghi nhớ đăng nhập",
+        btn_login: "Đăng nhập",
+        btn_signup: "Tạo tài khoản",
+        agree_terms: "Bằng việc đăng ký, bạn đồng ý với điều khoản & chính sách bảo mật."
       },
       en: {
-        brand_tag: "HOPE SEED",
-        brand_title: "P2P Donation Platform",
-        // not_logged: "Not logged in",
+        brand_tag: "R.E.A.L",
+        brand_title: "Transparent P2P Real Estate",
         logout: "Logout",
         login: "Login/Signup",
-        hero_h1: "Plant a seed – Nurture a life",
-        hero_p: "🌱 HopeSeed is a non-profit platform connecting the community with hospital patients in need. People can donate peer-to-peer with transparency. Every small act of kindness can grow into hope. Browse real stories, donate directly, and track progress openly or Be a connector of patient to our community",
-        cta_more: "Hope Stories ✨",
-        stat_donors_label: "Donors are ready",
-        stat_fund_label: "Trusted campaigns",
-        hero_widget_title: "Active campaigns",
-        hero_widget_note: "",
-        section_tag: "Suggested causes",
-        section_title: "Stories that need your help",
-        // card1_tag: "Precious Drops",
-        // card1_text: "Support with your Precious Drops 💧",
-        card2_tag: "Children",
-        card2_text: "Stand by cancer patients through treatment stages.",
-        card3_tag: "Emergency",
-        card3_text: "Rapid aid for cases requiring urgent intervention",
+        tab_login: "Login",
+        tab_signup: "Sign up",
+        hero_h1: "Real Estate Accountability Layer",
+        hero_p: "R.E.A.L is a peer-to-peer real estate platform where sellers self-price with area reference data, self-list properties, and connect directly with buyers. Get optional freelance brokers and AI/legal support to keep transactions clear, fair, and compliant.",
+        cta_more: "Browse active listings ✨",
+        stat_donors_label: "Active users",
+        stat_fund_label: "Active listings",
+        hero_widget_title: "Area reference price",
+        hero_widget_note: "Updated from recent transactions",
+        section_title: "R.E.A.L core tools",
+        card1_tag: "Reference pricing",
+        card1_text: "See neighborhood price bands, recent comps, and historical trends.",
+        card2_tag: "Self-list & P2P selling",
+        card2_text: "Sellers self-price & list; buyers contact directly with full transparency.",
+        card3_tag: "Legal & brokers",
+        card3_text: "AI/legal counsel for procedures; hire freelance brokers on demand.",
         email: "Email",
-        password: "Password"
+        password: "Password",
+        phone_optional: "Phone (optional)",
+        remember_me: "Remember me",
+        btn_login: "Login",
+        btn_signup: "Create account",
+        agree_terms: "By signing up, you agree to the Terms & Privacy Policy."
       }
     };
 
@@ -534,11 +415,32 @@
 
     function updateUIAfterLogin(email){
       const userInfo = document.getElementById('userInfo');
-      const logoutBtn = document.getElementById('logoutBtn');
+      const accountBtn = document.getElementById('accountBtn');
       const loginToggleBtn = document.getElementById('loginToggleBtn');
-      if (userInfo) userInfo.textContent = email || getEmail() || '—';
-      if (logoutBtn) logoutBtn.classList.remove('hidden');
+      if (userInfo) userInfo.textContent = email || getEmail() || '-';
+      if (accountBtn) accountBtn.classList.remove('hidden');
       if (loginToggleBtn) loginToggleBtn.classList.add('hidden');
+    }
+
+    // Ensure navbar shows Account when logged-in, Login when not
+    async function verifyAuthAndToggleUI(){
+      const accountBtn = document.getElementById('accountBtn');
+      const loginToggleBtn = document.getElementById('loginToggleBtn');
+      const showLogin = ()=>{ accountBtn?.classList.add('hidden'); loginToggleBtn?.classList.remove('hidden'); };
+      const showAccount = ()=>{ accountBtn?.classList.remove('hidden'); loginToggleBtn?.classList.add('hidden'); };
+
+      const token = getToken ? getToken() : (localStorage.getItem('access_token')||'');
+      if (!token){ showLogin(); return; }
+      try {
+        const res = await fetch((window.API_BASE||'').replace(/\/$/, '') + '/me', { headers:{ 'Authorization': `Bearer ${token}` }});
+        if (!res.ok) throw new Error(String(res.status));
+        const me = await res.json().catch(()=>({}));
+        updateUIAfterLogin(me?.email || getEmail && getEmail() || '');
+        showAccount();
+      } catch {
+        try { localStorage.removeItem('access_token'); } catch {}
+        showLogin();
+      }
     }
 
     async function doLogin(email, password, remember){
@@ -575,6 +477,7 @@
           const payload = { email, password };
           if (phone) payload.phone = phone; // ĐỂ STRING, đừng Number() để khỏi mất số 0 đầu
           await httpPost(`${API_BASE}/register`, payload);
+          try { if (phone) localStorage.setItem('user_phone', phone); } catch {}
           alert('Đăng ký thành công. Vui lòng đăng nhập.');
           switchAuthTab('login');
         }catch(err){
@@ -606,15 +509,19 @@
       localStorage.clear();
       location.reload();
     }
-    document.getElementById('logoutBtn')?.addEventListener('click', logout);
+    document.getElementById('accountBtn')?.addEventListener('click', ()=>{
+      if (!getToken()) { openAuth('login'); return; }
+      location.href = 'user.html';
+    });
 
     // Init on load
     document.addEventListener("DOMContentLoaded", () => {
       applyI18n(localStorage.getItem("lang") || "vi");
       document.getElementById('langBtn')?.addEventListener('click', toggleLang);
       document.getElementById('loginToggleBtn')?.addEventListener('click', toggleLogin);
-
-      if (getToken()){ updateUIAfterLogin(getEmail()); }
+      verifyAuthAndToggleUI();
+      // Sync between tabs
+      window.addEventListener('storage', (e)=>{ if (e.key === 'access_token') verifyAuthAndToggleUI(); });
     });
   </script>
 </body>

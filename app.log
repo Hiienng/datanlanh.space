@@ -1,0 +1,382 @@
+2025-10-21 23:51:50,119 - trueland - INFO - Gemini AI configured successfully
+2025-10-21 23:51:59,228 - trueland - INFO - [20251021235159228248] GET /listings - Started
+2025-10-21 23:51:59,228 - trueland - INFO - Cache MISS: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-21 23:52:00,445 - trueland - INFO - [20251021235159228248] GET /listings - Status: 200 - Duration: 1.217s
+2025-10-21 23:58:56,463 - trueland - INFO - [20251021235856461772] GET /listings - Started
+2025-10-21 23:58:56,465 - trueland - INFO - Cache MISS: listings:090784d50bb091236a41530654be7869
+2025-10-21 23:58:59,736 - trueland - INFO - [20251021235856461772] GET /listings - Status: 200 - Duration: 3.274s
+2025-10-21 23:59:01,253 - trueland - INFO - [20251021235901251873] GET /listings - Started
+2025-10-21 23:59:01,261 - trueland - INFO - Cache MISS: listings:dfc301325c1c5b8be42db9a13fbef2d5
+2025-10-21 23:59:02,471 - trueland - INFO - [20251021235901251873] GET /listings - Status: 200 - Duration: 1.219s
+2025-10-21 23:59:06,166 - trueland - INFO - [20251021235906166011] GET /listings - Started
+2025-10-21 23:59:06,173 - trueland - INFO - Cache MISS: listings:d395c454f3178aef68e04ae504b463b6
+2025-10-21 23:59:07,423 - trueland - INFO - [20251021235906166011] GET /listings - Status: 200 - Duration: 1.257s
+2025-10-22 00:13:09,840 - trueland - INFO - Gemini AI configured successfully
+2025-10-22 00:13:13,246 - trueland - INFO - [20251022001313246784] GET /listings - Started
+2025-10-22 00:13:14,521 - trueland - INFO - [20251022001313246784] GET /listings - Status: 200 - Duration: 1.274s
+2025-10-22 00:19:28,560 - trueland - INFO - [20251022001928560961] GET /listings - Started
+2025-10-22 00:19:31,718 - trueland - INFO - [20251022001928560961] GET /listings - Status: 200 - Duration: 3.157s
+2025-10-22 00:22:50,688 - trueland - INFO - Gemini AI configured successfully
+2025-10-22 00:23:38,800 - trueland - INFO - Gemini AI configured successfully
+2025-10-22 00:24:42,233 - trueland - INFO - Gemini AI configured successfully
+2025-10-22 00:25:47,377 - trueland - INFO - Gemini AI configured successfully
+2025-10-22 00:26:49,544 - trueland - INFO - Gemini AI configured successfully
+2025-10-22 00:26:50,454 - trueland - INFO - [20251022002650454039] GET /listings - Started
+2025-10-22 00:26:50,817 - trueland - INFO - [20251022002650454039] GET /listings - Status: 200 - Duration: 0.364s
+2025-10-22 00:28:00,528 - trueland - INFO - [20251022002800528732] POST /login - Started
+2025-10-22 00:28:00,813 - trueland - ERROR - [20251022002800528732] POST /login - ERROR: hash could not be identified - Duration: 0.285s
+Traceback (most recent call last):
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\middleware\base.py", line 151, in call_next
+    message = await recv_stream.receive()
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\anyio\streams\memory.py", line 126, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\trueland\main.py", line 74, in dispatch
+    response = await call_next(request)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\anyio\_backends\_asyncio.py", line 2476, in run_sync_in_worker_thread
+    return await future
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\anyio\_backends\_asyncio.py", line 967, in run
+    result = context.run(func, *args)
+  File "C:\Users\admin\Desktop\trueland\main.py", line 387, in login
+    if not db_user or not verify_password(user.password, db_user.password_hash):
+  File "C:\Users\admin\Desktop\trueland\auth.py", line 20, in verify_password
+    return pwd_context.verify(plain_password, hashed_password)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\passlib\context.py", line 2343, in verify
+    record = self._get_or_identify_record(hash, scheme, category)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\passlib\context.py", line 2031, in _get_or_identify_record
+    return self._identify_record(hash, category)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\passlib\context.py", line 1132, in identify_record
+    raise exc.UnknownHashError("hash could not be identified")
+passlib.exc.UnknownHashError: hash could not be identified
+2025-10-22 00:28:13,419 - trueland - INFO - [20251022002813419146] POST /login - Started
+2025-10-22 00:28:15,297 - trueland - INFO - [20251022002813419146] POST /login - Status: 200 - Duration: 1.878s
+2025-10-22 00:28:37,870 - trueland - INFO - [20251022002837870990] POST /listings - Started
+2025-10-22 00:28:38,353 - trueland - INFO - Created listing 29, cache cleared
+2025-10-22 00:28:38,467 - trueland - INFO - [20251022002837870990] POST /listings - Status: 200 - Duration: 0.596s
+2025-10-22 00:28:40,298 - trueland - INFO - [20251022002840298558] GET /listings - Started
+2025-10-22 00:28:40,578 - trueland - INFO - [20251022002840298558] GET /listings - Status: 200 - Duration: 0.280s
+2025-10-22 00:28:50,808 - trueland - INFO - [20251022002850808297] GET /listings - Started
+2025-10-22 00:28:50,808 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-22 00:28:50,816 - trueland - INFO - [20251022002850808297] GET /listings - Status: 200 - Duration: 0.008s
+2025-10-22 00:31:32,739 - trueland - INFO - [20251022003132739545] GET /listings - Started
+2025-10-22 00:31:32,961 - trueland - INFO - [20251022003132739545] GET /listings - Status: 200 - Duration: 0.222s
+2025-10-22 00:32:47,842 - trueland - INFO - Gemini AI configured successfully
+2025-10-22 00:33:47,044 - trueland - INFO - [20251022003347044928] GET /listings - Started
+2025-10-22 00:33:47,390 - trueland - INFO - [20251022003347044928] GET /listings - Status: 200 - Duration: 0.346s
+2025-10-22 00:36:02,897 - trueland - INFO - [20251022003602897100] POST /listings - Started
+2025-10-22 00:36:04,093 - trueland - INFO - Created listing 30, cache cleared
+2025-10-22 00:36:04,331 - trueland - INFO - [20251022003602897100] POST /listings - Status: 200 - Duration: 1.434s
+2025-10-22 00:36:04,352 - trueland - INFO - [20251022003604352773] POST /listings/30/header-image - Started
+2025-10-22 00:36:07,809 - trueland - INFO - [20251022003604352773] POST /listings/30/header-image - Status: 200 - Duration: 3.454s
+2025-10-22 00:36:10,887 - trueland - INFO - [20251022003610887650] GET /listings - Started
+2025-10-22 00:36:11,222 - trueland - INFO - [20251022003610887650] GET /listings - Status: 200 - Duration: 0.335s
+2025-10-22 00:39:38,658 - trueland - INFO - [20251022003938658228] GET /listings - Started
+2025-10-22 00:39:38,667 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-22 00:39:38,672 - trueland - INFO - [20251022003938658228] GET /listings - Status: 200 - Duration: 0.014s
+2025-10-22 00:39:49,986 - trueland - INFO - [20251022003949986926] GET /listings - Started
+2025-10-22 00:39:49,996 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-22 00:39:50,000 - trueland - INFO - [20251022003949986926] GET /listings - Status: 200 - Duration: 0.013s
+2025-10-22 00:41:27,931 - trueland - INFO - [20251022004127931580] GET /listings - Started
+2025-10-22 00:41:29,026 - trueland - INFO - [20251022004127931580] GET /listings - Status: 200 - Duration: 1.094s
+2025-10-22 00:41:33,504 - trueland - INFO - [20251022004133504877] GET /listings - Started
+2025-10-22 00:41:33,509 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-22 00:41:33,514 - trueland - INFO - [20251022004133504877] GET /listings - Status: 200 - Duration: 0.009s
+2025-10-22 00:45:48,898 - trueland - INFO - [20251022004548898124] GET /listings - Started
+2025-10-22 00:45:48,903 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-22 00:45:48,908 - trueland - INFO - [20251022004548898124] GET /listings - Status: 200 - Duration: 0.010s
+2025-10-22 00:46:53,330 - trueland - INFO - [20251022004653330238] GET /listings/30 - Started
+2025-10-22 00:46:54,386 - trueland - INFO - [20251022004653330238] GET /listings/30 - Status: 200 - Duration: 1.057s
+2025-10-22 00:47:33,147 - trueland - INFO - [20251022004733147013] GET /listings - Started
+2025-10-22 00:47:33,493 - trueland - INFO - [20251022004733147013] GET /listings - Status: 200 - Duration: 0.346s
+2025-10-22 00:47:43,656 - trueland - INFO - [20251022004743656743] GET /listings - Started
+2025-10-22 00:47:43,668 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-22 00:47:43,678 - trueland - INFO - [20251022004743656743] GET /listings - Status: 200 - Duration: 0.022s
+2025-10-22 00:50:06,967 - trueland - INFO - [20251022005006967981] GET /listings - Started
+2025-10-22 00:50:06,976 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-22 00:50:06,976 - trueland - INFO - [20251022005006967981] GET /listings - Status: 200 - Duration: 0.008s
+2025-10-22 00:54:22,826 - trueland - INFO - [20251022005422826531] GET /listings - Started
+2025-10-22 00:54:23,950 - trueland - INFO - [20251022005422826531] GET /listings - Status: 200 - Duration: 1.124s
+2025-10-22 00:55:51,334 - trueland - INFO - [20251022005551334390] GET /listings - Started
+2025-10-22 00:55:51,334 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-22 00:55:51,342 - trueland - INFO - [20251022005551334390] GET /listings - Status: 200 - Duration: 0.008s
+2025-10-22 00:59:02,638 - trueland - INFO - Gemini AI configured successfully
+2025-10-22 01:02:34,379 - trueland - INFO - [20251022010234379154] GET /listings - Started
+2025-10-22 01:02:35,560 - trueland - WARNING - SLOW QUERY (1.070s): SELECT listings.listing_id AS listings_listing_id, listings.title AS listings_title, listings.description AS listings_description, listings.listing_type AS listings_listing_type, listings.asset_type A
+2025-10-22 01:02:35,905 - trueland - INFO - [20251022010234379154] GET /listings - Status: 200 - Duration: 1.526s
+2025-10-22 01:02:36,215 - trueland - INFO - [20251022010236215208] GET /me - Started
+2025-10-22 01:02:36,233 - trueland - INFO - [20251022010236215208] GET /me - Status: 401 - Duration: 0.018s
+2025-10-22 01:02:39,268 - trueland - INFO - [20251022010239268036] GET /listings - Started
+2025-10-22 01:02:39,268 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-22 01:02:39,276 - trueland - INFO - [20251022010239268036] GET /listings - Status: 200 - Duration: 0.008s
+2025-10-22 01:02:43,054 - trueland - INFO - [20251022010243054405] GET /me - Started
+2025-10-22 01:02:43,057 - trueland - INFO - [20251022010243054405] GET /me - Status: 401 - Duration: 0.003s
+2025-10-22 01:10:52,996 - trueland - INFO - Gemini AI configured successfully
+2025-10-22 01:10:54,569 - trueland - INFO - [20251022011054569993] GET /listings - Started
+2025-10-22 01:10:54,988 - trueland - INFO - [20251022011054569993] GET /listings - Status: 200 - Duration: 0.419s
+2025-10-22 01:10:57,851 - trueland - INFO - [20251022011057851524] GET /me - Started
+2025-10-22 01:10:57,872 - trueland - INFO - [20251022011057851524] GET /me - Status: 401 - Duration: 0.021s
+2025-10-26 17:42:44,392 - trueland - INFO - Gemini AI configured successfully
+2025-10-26 17:42:49,786 - trueland - INFO - [20251026174249786787] GET /listings - Started
+2025-10-26 17:42:50,315 - trueland - INFO - [20251026174249786787] GET /listings - Status: 200 - Duration: 0.529s
+2025-10-26 17:42:51,104 - trueland - INFO - [20251026174251104955] GET /listings/29 - Started
+2025-10-26 17:42:51,342 - trueland - INFO - [20251026174251104955] GET /listings/29 - Status: 200 - Duration: 0.237s
+2025-10-26 17:45:24,888 - trueland - INFO - [20251026174524888658] GET /me - Started
+2025-10-26 17:45:24,965 - trueland - INFO - [20251026174524888658] GET /me - Status: 401 - Duration: 0.076s
+2025-10-26 17:45:30,072 - trueland - INFO - [20251026174530072875] GET /listings - Started
+2025-10-26 17:45:30,080 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-26 17:45:30,105 - trueland - INFO - [20251026174530072875] GET /listings - Status: 200 - Duration: 0.032s
+2025-10-26 17:45:40,009 - trueland - INFO - [20251026174540008115] GET /me - Started
+2025-10-26 17:45:40,022 - trueland - INFO - [20251026174540008115] GET /me - Status: 401 - Duration: 0.014s
+2025-10-26 17:51:23,833 - trueland - INFO - [20251026175123833587] GET /me - Started
+2025-10-26 17:51:23,838 - trueland - INFO - [20251026175123833587] GET /me - Status: 401 - Duration: 0.005s
+2025-10-27 11:55:26,701 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 11:56:01,964 - trueland - INFO - [20251027115601964305] GET /listings - Started
+2025-10-27 11:56:02,345 - trueland - INFO - [20251027115601964305] GET /listings - Status: 200 - Duration: 0.382s
+2025-10-27 11:58:18,364 - trueland - INFO - [20251027115818364919] GET /me - Started
+2025-10-27 11:58:18,400 - trueland - INFO - [20251027115818364919] GET /me - Status: 401 - Duration: 0.036s
+2025-10-27 11:58:22,952 - trueland - INFO - [20251027115822952808] GET /listings - Started
+2025-10-27 11:58:22,959 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-27 11:58:22,966 - trueland - INFO - [20251027115822952808] GET /listings - Status: 200 - Duration: 0.013s
+2025-10-27 11:58:54,948 - trueland - INFO - [20251027115854948605] POST /login - Started
+2025-10-27 11:58:56,339 - trueland - INFO - [20251027115854948605] POST /login - Status: 200 - Duration: 1.390s
+2025-10-27 11:59:08,284 - trueland - INFO - [20251027115908284497] GET /me - Started
+2025-10-27 11:59:08,537 - trueland - INFO - [20251027115908284497] GET /me - Status: 200 - Duration: 0.253s
+2025-10-27 11:59:08,562 - trueland - INFO - [20251027115908561464] GET /me/listings - Started
+2025-10-27 11:59:08,939 - trueland - INFO - [20251027115908561464] GET /me/listings - Status: 200 - Duration: 0.378s
+2025-10-27 12:01:55,366 - trueland - INFO - [20251027120155366362] GET /listings - Started
+2025-10-27 12:01:56,142 - trueland - INFO - [20251027120155366362] GET /listings - Status: 200 - Duration: 0.776s
+2025-10-27 12:02:42,953 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 12:06:54,283 - trueland - INFO - [20251027120654283021] GET /me - Started
+2025-10-27 12:06:54,983 - trueland - INFO - [20251027120654283021] GET /me - Status: 200 - Duration: 0.699s
+2025-10-27 12:06:55,058 - trueland - INFO - [20251027120655057582] GET /me/listings - Started
+2025-10-27 12:06:55,602 - trueland - INFO - [20251027120655057582] GET /me/listings - Status: 200 - Duration: 0.545s
+2025-10-27 12:08:32,743 - trueland - INFO - [20251027120832743658] GET /listings - Started
+2025-10-27 12:08:33,554 - trueland - INFO - [20251027120832743658] GET /listings - Status: 200 - Duration: 0.811s
+2025-10-27 12:10:55,720 - trueland - INFO - [20251027121055720008] GET /me - Started
+2025-10-27 12:10:56,049 - trueland - INFO - [20251027121055720008] GET /me - Status: 200 - Duration: 0.329s
+2025-10-27 12:10:56,071 - trueland - INFO - [20251027121056071808] GET /me/listings - Started
+2025-10-27 12:10:56,529 - trueland - INFO - [20251027121056071808] GET /me/listings - Status: 200 - Duration: 0.458s
+2025-10-27 12:15:54,355 - trueland - INFO - [20251027121554355619] GET /listings - Started
+2025-10-27 12:15:55,330 - trueland - INFO - [20251027121554355619] GET /listings - Status: 200 - Duration: 0.975s
+2025-10-27 12:15:57,873 - trueland - INFO - [20251027121557873425] GET /me - Started
+2025-10-27 12:15:58,444 - trueland - INFO - [20251027121557873425] GET /me - Status: 200 - Duration: 0.571s
+2025-10-27 12:15:58,476 - trueland - INFO - [20251027121558476148] GET /me/listings - Started
+2025-10-27 12:15:59,089 - trueland - INFO - [20251027121558476148] GET /me/listings - Status: 200 - Duration: 0.613s
+2025-10-27 12:16:03,808 - trueland - INFO - [20251027121603808061] DELETE /listings/29 - Started
+2025-10-27 12:16:05,204 - trueland - INFO - Deleted listing 29, cache cleared
+2025-10-27 12:16:05,265 - trueland - INFO - [20251027121603808061] DELETE /listings/29 - Status: 200 - Duration: 1.457s
+2025-10-27 12:16:05,285 - trueland - INFO - [20251027121605285914] GET /me/listings - Started
+2025-10-27 12:16:05,838 - trueland - INFO - [20251027121605285914] GET /me/listings - Status: 200 - Duration: 0.553s
+2025-10-27 12:16:11,446 - trueland - INFO - [20251027121611446936] DELETE /listings/27 - Started
+2025-10-27 12:16:12,850 - trueland - INFO - Deleted listing 27, cache cleared
+2025-10-27 12:16:12,920 - trueland - INFO - [20251027121611446936] DELETE /listings/27 - Status: 200 - Duration: 1.473s
+2025-10-27 12:16:12,950 - trueland - INFO - [20251027121612948996] GET /me/listings - Started
+2025-10-27 12:16:13,402 - trueland - INFO - [20251027121612948996] GET /me/listings - Status: 200 - Duration: 0.454s
+2025-10-27 12:16:25,494 - trueland - INFO - [20251027121625494205] DELETE /listings/28 - Started
+2025-10-27 12:16:26,397 - trueland - INFO - Deleted listing 28, cache cleared
+2025-10-27 12:16:26,751 - trueland - INFO - [20251027121625494205] DELETE /listings/28 - Status: 200 - Duration: 1.257s
+2025-10-27 12:16:26,761 - trueland - INFO - [20251027121626761817] GET /me/listings - Started
+2025-10-27 12:16:27,135 - trueland - INFO - [20251027121626761817] GET /me/listings - Status: 200 - Duration: 0.374s
+2025-10-27 12:16:32,435 - trueland - INFO - [20251027121632435368] DELETE /listings/25 - Started
+2025-10-27 12:16:33,347 - trueland - INFO - Deleted listing 25, cache cleared
+2025-10-27 12:16:33,417 - trueland - INFO - [20251027121632435368] DELETE /listings/25 - Status: 200 - Duration: 0.982s
+2025-10-27 12:16:33,420 - trueland - INFO - [20251027121633420973] GET /me/listings - Started
+2025-10-27 12:16:33,836 - trueland - INFO - [20251027121633420973] GET /me/listings - Status: 200 - Duration: 0.416s
+2025-10-27 12:16:38,990 - trueland - INFO - [20251027121638985880] DELETE /listings/24 - Started
+2025-10-27 12:16:40,049 - trueland - INFO - Deleted listing 24, cache cleared
+2025-10-27 12:16:40,123 - trueland - INFO - [20251027121638985880] DELETE /listings/24 - Status: 200 - Duration: 1.137s
+2025-10-27 12:16:40,134 - trueland - INFO - [20251027121640134905] GET /me/listings - Started
+2025-10-27 12:16:40,535 - trueland - INFO - [20251027121640134905] GET /me/listings - Status: 200 - Duration: 0.401s
+2025-10-27 12:16:43,112 - trueland - INFO - [20251027121643112639] DELETE /listings/23 - Started
+2025-10-27 12:16:43,947 - trueland - INFO - Deleted listing 23, cache cleared
+2025-10-27 12:16:44,041 - trueland - INFO - [20251027121643112639] DELETE /listings/23 - Status: 200 - Duration: 0.929s
+2025-10-27 12:16:44,050 - trueland - INFO - [20251027121644050560] GET /me/listings - Started
+2025-10-27 12:16:44,619 - trueland - INFO - [20251027121644050560] GET /me/listings - Status: 200 - Duration: 0.569s
+2025-10-27 12:16:46,134 - trueland - INFO - [20251027121646134393] GET /listings - Started
+2025-10-27 12:16:46,764 - trueland - INFO - [20251027121646134393] GET /listings - Status: 200 - Duration: 0.630s
+2025-10-27 12:20:46,608 - trueland - INFO - [20251027122046608800] GET /listings - Started
+2025-10-27 12:20:46,976 - trueland - INFO - [20251027122046608800] GET /listings - Status: 200 - Duration: 0.368s
+2025-10-27 12:24:47,809 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 12:27:15,393 - trueland - INFO - [20251027122715392519] GET /me - Started
+2025-10-27 12:27:15,844 - trueland - INFO - [20251027122715392519] GET /me - Status: 200 - Duration: 0.452s
+2025-10-27 12:27:19,846 - trueland - INFO - [20251027122719846903] GET /listings - Started
+2025-10-27 12:27:20,208 - trueland - INFO - [20251027122719846903] GET /listings - Status: 200 - Duration: 0.362s
+2025-10-27 12:36:10,819 - trueland - INFO - [20251027123610819908] GET /me - Started
+2025-10-27 12:36:10,832 - trueland - INFO - [20251027123610819908] GET /me - Status: 401 - Duration: 0.013s
+2025-10-27 12:36:10,931 - trueland - INFO - [20251027123610931432] GET /listings - Started
+2025-10-27 12:36:12,053 - trueland - INFO - [20251027123610931432] GET /listings - Status: 200 - Duration: 1.123s
+2025-10-27 12:36:38,442 - trueland - INFO - [20251027123638442602] POST /login - Started
+2025-10-27 12:36:41,086 - trueland - INFO - [20251027123638442602] POST /login - Status: 200 - Duration: 2.644s
+2025-10-27 12:36:45,225 - trueland - INFO - [20251027123645225908] GET /me - Started
+2025-10-27 12:36:45,530 - trueland - INFO - [20251027123645225908] GET /me - Status: 200 - Duration: 0.305s
+2025-10-27 12:36:45,553 - trueland - INFO - [20251027123645553771] GET /me/listings - Started
+2025-10-27 12:36:45,875 - trueland - INFO - [20251027123645553771] GET /me/listings - Status: 200 - Duration: 0.321s
+2025-10-27 12:36:53,972 - trueland - INFO - [20251027123653972928] GET /me - Started
+2025-10-27 12:36:54,012 - trueland - INFO - [20251027123654012087] GET /listings - Started
+2025-10-27 12:36:54,022 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-27 12:36:54,027 - trueland - INFO - [20251027123654012087] GET /listings - Status: 200 - Duration: 0.016s
+2025-10-27 12:36:54,202 - trueland - INFO - [20251027123653972928] GET /me - Status: 200 - Duration: 0.229s
+2025-10-27 12:36:54,217 - trueland - INFO - [20251027123654217162] GET /me - Started
+2025-10-27 12:36:54,437 - trueland - INFO - [20251027123654217162] GET /me - Status: 200 - Duration: 0.220s
+2025-10-27 12:40:35,911 - trueland - INFO - [20251027124035911439] GET /me - Started
+2025-10-27 12:40:36,201 - trueland - INFO - [20251027124035911439] GET /me - Status: 200 - Duration: 0.288s
+2025-10-27 12:40:36,231 - trueland - INFO - [20251027124036231465] GET /me/listings - Started
+2025-10-27 12:40:36,534 - trueland - INFO - [20251027124036231465] GET /me/listings - Status: 200 - Duration: 0.303s
+2025-10-27 12:40:42,022 - trueland - INFO - [20251027124042022169] GET /listings - Started
+2025-10-27 12:40:42,048 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-27 12:40:42,094 - trueland - INFO - [20251027124042022169] GET /listings - Status: 200 - Duration: 0.073s
+2025-10-27 12:41:15,386 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 12:41:15,388 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 12:44:23,116 - trueland - INFO - [20251027124423114498] GET /me - Started
+2025-10-27 12:44:23,198 - trueland - INFO - [20251027124423198993] GET /listings - Started
+2025-10-27 12:44:23,499 - trueland - INFO - [20251027124423114498] GET /me - Status: 200 - Duration: 0.385s
+2025-10-27 12:44:23,501 - trueland - INFO - [20251027124423501221] GET /me - Started
+2025-10-27 12:44:23,708 - trueland - INFO - [20251027124423501221] GET /me - Status: 200 - Duration: 0.207s
+2025-10-27 12:44:24,017 - trueland - INFO - [20251027124423198993] GET /listings - Status: 200 - Duration: 0.819s
+2025-10-27 12:44:28,477 - trueland - INFO - [20251027124428390554] GET /me - Started
+2025-10-27 12:44:28,611 - trueland - INFO - [20251027124428609048] GET /listings - Started
+2025-10-27 12:44:28,983 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-27 12:44:29,045 - trueland - INFO - [20251027124428609048] GET /listings - Status: 200 - Duration: 0.436s
+2025-10-27 12:44:29,234 - trueland - INFO - [20251027124428390554] GET /me - Status: 200 - Duration: 0.844s
+2025-10-27 12:44:29,250 - trueland - INFO - [20251027124429250562] GET /me - Started
+2025-10-27 12:44:29,509 - trueland - INFO - [20251027124429250562] GET /me - Status: 200 - Duration: 0.259s
+2025-10-27 12:44:44,681 - trueland - INFO - [20251027124444681225] POST /ai/chat - Started
+2025-10-27 12:44:45,665 - trueland - ERROR - AI chat error: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\trueland\main.py", line 856, in ai_chat
+    response = model.generate_content(full_prompt)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\google\generativeai\generative_models.py", line 331, in generate_content
+    response = self._client.generate_content(
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\client.py", line 835, in generate_content
+    response = rpc(
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\gapic_v1\method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\retry\retry_unary.py", line 294, in retry_wrapped_func
+    return retry_target(
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\retry\retry_unary.py", line 156, in retry_target
+    next_sleep = _retry_error_helper(
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\retry\retry_base.py", line 214, in _retry_error_helper
+    raise final_exc from source_exc
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\retry\retry_unary.py", line 147, in retry_target
+    result = target()
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+  File "C:\Users\admin\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\grpc_helpers.py", line 78, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.NotFound: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-10-27 12:44:46,554 - trueland - INFO - [20251027124444681225] POST /ai/chat - Status: 500 - Duration: 1.873s
+2025-10-27 12:46:06,730 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 12:46:06,730 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 12:46:22,979 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 12:46:22,979 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 12:48:12,039 - trueland - INFO - [20251027124812037764] POST /ai/chat - Started
+2025-10-27 12:48:13,347 - trueland - ERROR - AI chat error: 503: AI model unavailable. Tried: gemini-1.5-flash, gemini-1.5-flash-8b, gemini-1.5-pro, gemini-pro; last error: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\trueland\main.py", line 891, in ai_chat
+    raise HTTPException(status_code=503, detail=detail)
+fastapi.exceptions.HTTPException: 503: AI model unavailable. Tried: gemini-1.5-flash, gemini-1.5-flash-8b, gemini-1.5-pro, gemini-pro; last error: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-10-27 12:48:13,417 - trueland - INFO - [20251027124812037764] POST /ai/chat - Status: 500 - Duration: 1.380s
+2025-10-27 12:49:56,931 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 12:49:56,931 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 12:50:31,825 - trueland - INFO - [20251027125031825030] POST /ai/chat - Started
+2025-10-27 12:50:33,207 - trueland - INFO - [20251027125031825030] POST /ai/chat - Status: 503 - Duration: 1.382s
+2025-10-27 13:12:03,173 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 13:12:03,173 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 13:12:35,645 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 13:12:35,645 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 13:13:26,508 - trueland - INFO - [20251027131326508637] GET /ai/models - Started
+2025-10-27 13:13:26,523 - trueland - INFO - [20251027131326523475] GET /listings - Started
+2025-10-27 13:13:26,932 - trueland - INFO - [20251027131326523475] GET /listings - Status: 200 - Duration: 0.409s
+2025-10-27 13:13:27,272 - trueland - INFO - [20251027131326508637] GET /ai/models - Status: 200 - Duration: 0.764s
+2025-10-27 13:13:46,996 - trueland - INFO - [20251027131346996412] POST /login - Started
+2025-10-27 13:13:50,672 - trueland - INFO - [20251027131346996412] POST /login - Status: 200 - Duration: 3.676s
+2025-10-27 13:13:55,010 - trueland - INFO - [20251027131355010086] POST /ai/chat - Started
+2025-10-27 13:13:57,250 - trueland - INFO - [20251027131355010086] POST /ai/chat - Status: 200 - Duration: 2.240s
+2025-10-27 13:14:31,784 - trueland - INFO - [20251027131431782221] POST /ai/chat - Started
+2025-10-27 13:14:38,309 - trueland - INFO - [20251027131431782221] POST /ai/chat - Status: 200 - Duration: 6.527s
+2025-10-27 13:14:57,404 - trueland - INFO - [20251027131457404205] POST /ai/chat - Started
+2025-10-27 13:15:01,556 - trueland - INFO - [20251027131457404205] POST /ai/chat - Status: 200 - Duration: 4.152s
+2025-10-27 20:59:17,108 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 20:59:17,110 - trueland - INFO - Gemini AI configured successfully
+2025-10-27 21:19:31,838 - trueland - INFO - [20251027211931838152] GET /me - Started
+2025-10-27 21:19:31,892 - trueland - INFO - [20251027211931838152] GET /me - Status: 401 - Duration: 0.054s
+2025-10-27 21:19:31,968 - trueland - INFO - [20251027211931968960] GET /ai/models - Started
+2025-10-27 21:19:31,979 - trueland - INFO - [20251027211931978776] GET /listings - Started
+2025-10-27 21:19:32,555 - trueland - INFO - [20251027211931968960] GET /ai/models - Status: 200 - Duration: 0.587s
+2025-10-27 21:19:34,061 - trueland - INFO - [20251027211931978776] GET /listings - Status: 200 - Duration: 2.083s
+2025-10-27 21:20:23,713 - trueland - INFO - [20251027212023713592] POST /login - Started
+2025-10-27 21:20:26,914 - trueland - INFO - [20251027212023713592] POST /login - Status: 200 - Duration: 3.200s
+2025-10-27 21:20:40,959 - trueland - INFO - [20251027212040958754] GET /me - Started
+2025-10-27 21:20:41,395 - trueland - INFO - [20251027212040958754] GET /me - Status: 200 - Duration: 0.436s
+2025-10-27 21:20:41,485 - trueland - INFO - [20251027212041458293] GET /me/listings - Started
+2025-10-27 21:20:42,022 - trueland - INFO - [20251027212041458293] GET /me/listings - Status: 200 - Duration: 0.564s
+2025-10-27 21:20:45,845 - trueland - INFO - [20251027212045843606] GET /me - Started
+2025-10-27 21:20:45,954 - trueland - INFO - [20251027212045954704] GET /ai/models - Started
+2025-10-27 21:20:45,982 - trueland - INFO - [20251027212045982173] GET /listings - Started
+2025-10-27 21:20:45,999 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-27 21:20:46,010 - trueland - INFO - [20251027212045982173] GET /listings - Status: 200 - Duration: 0.026s
+2025-10-27 21:20:46,202 - trueland - INFO - [20251027212045954704] GET /ai/models - Status: 200 - Duration: 0.248s
+2025-10-27 21:20:46,973 - trueland - INFO - [20251027212045843606] GET /me - Status: 200 - Duration: 1.126s
+2025-10-27 21:20:46,984 - trueland - INFO - [20251027212046984252] GET /me - Started
+2025-10-27 21:20:47,747 - trueland - INFO - [20251027212046984252] GET /me - Status: 200 - Duration: 0.763s
+2025-10-27 21:38:51,323 - trueland - INFO - [20251027213851323527] GET /listings/26 - Started
+2025-10-27 21:38:54,139 - trueland - INFO - [20251027213851323527] GET /listings/26 - Status: 200 - Duration: 2.816s
+2025-10-27 21:38:55,572 - trueland - INFO - [20251027213855572535] GET /listings/17 - Started
+2025-10-27 21:38:56,664 - trueland - INFO - [20251027213855572535] GET /listings/17 - Status: 200 - Duration: 1.092s
+2025-10-28 19:22:44,072 - trueland - INFO - Gemini AI configured successfully
+2025-10-28 19:22:44,074 - trueland - INFO - Gemini AI configured successfully
+2025-10-28 19:22:45,178 - trueland - INFO - [20251028192245177359] GET /listings - Started
+2025-10-28 19:22:45,634 - trueland - INFO - [20251028192245177359] GET /listings - Status: 200 - Duration: 0.457s
+2025-10-28 19:22:50,841 - trueland - INFO - [20251028192250841831] GET /ai/models - Started
+2025-10-28 19:22:50,853 - trueland - INFO - [20251028192250851831] GET /listings - Started
+2025-10-28 19:22:50,896 - trueland - INFO - Cache HIT: listings:5714ed9175048151dfccaf289b5d98b2
+2025-10-28 19:22:50,945 - trueland - INFO - [20251028192250851831] GET /listings - Status: 200 - Duration: 0.094s
+2025-10-28 19:22:51,733 - trueland - INFO - [20251028192250841831] GET /ai/models - Status: 200 - Duration: 0.892s
+2025-10-28 19:23:44,382 - trueland - INFO - [20251028192344382452] POST /login - Started
+2025-10-28 19:23:46,068 - trueland - INFO - [20251028192344382452] POST /login - Status: 200 - Duration: 1.685s
+2025-10-28 19:23:49,306 - trueland - INFO - [20251028192349306259] POST /ai/chat - Started
+2025-10-28 19:23:56,202 - trueland - INFO - [20251028192349306259] POST /ai/chat - Status: 200 - Duration: 6.896s
+2025-11-01 12:44:22,671 - trueland - INFO - Gemini AI configured successfully
+2025-11-01 12:44:22,676 - trueland - INFO - Gemini AI configured successfully
+2025-11-01 12:44:24,285 - trueland - INFO - [20251101124424285978] GET /listings - Started
+2025-11-01 12:44:25,000 - trueland - INFO - [20251101124424285978] GET /listings - Status: 200 - Duration: 0.715s
+2025-11-01 12:44:48,467 - trueland - INFO - Gemini AI configured successfully
+2025-11-01 12:44:48,467 - trueland - INFO - Gemini AI configured successfully
+2025-11-01 13:02:44,781 - trueland - INFO - [20251101130244781859] POST /login - Started
+2025-11-01 13:02:48,298 - trueland - INFO - [20251101130244781859] POST /login - Status: 200 - Duration: 3.516s

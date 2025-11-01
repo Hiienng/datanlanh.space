@@ -9,3 +9,6 @@ requests
 sqlalchemy
 uvicorn
 uvicorn[standard]
+redis
+psutil
+google-generativeai

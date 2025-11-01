@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>R.E.A.L</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Pacifico&family=Style+Script&display=swap&subset=vietnamese" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxuvwv/b4jzlGC62Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="icon" href="https://ik.imagekit.io/o2u9hny2s/trueland/trueland_icon.png" type="image/png">
+  <link rel="stylesheet" href="styles.css" />
+  <script type="text/javascript">
+  window.API_BASE = 'https://trueland.onrender.com';
+  window.API_BASE = 'http://127.0.0.1:8000';
+  // // Unified API base: local vs production
+  // (function(){
+  //   var h = location.hostname;
+  //   if (h === 'localhost' || h === '127.0.0.1') {
+  //     window.API_BASE = 'http://127.0.0.1:8000';
+  //   } else {
+  //     window.API_BASE = 'https://trueland.onrender.com';
+  //   }
+  // })();
+  
+  window.httpPost = async function(url, body){
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      let msg = `HTTP ${res.status} ${res.statusText}`;
+      try { const j = await res.json(); if (j && j.detail) msg = j.detail; } catch {}
+      throw new Error(msg);
+    }
+    return res.json();
+  };
+  
+  var gk_isXlsx = false;
+  var gk_xlsxFileLookup = {};
+  var gk_fileData = {};
+  function filledCell(cell) { return cell !== '' && cell != null; }
+  function loadFileData(filename) {
+    if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+      try {
+        var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+        var firstSheetName = workbook.SheetNames[0];
+        var worksheet = workbook.Sheets[firstSheetName];
+        var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+        var filteredData = jsonData.filter(row => row.some(filledCell));
+        var headerRowIndex = filteredData.findIndex((row, index) =>
+          row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+        );
+        if (headerRowIndex === -1 || headerRowIndex > 25) headerRowIndex = 0;
+        var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+        csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+        return csv;
+      } catch (e) { console.error(e); return ""; }
+    }
+    return gk_fileData[filename] || "";
+  }
+  </script>
+</head>
+
+<body>
+  <!-- Animated background -->
+  <div class="bg-particles" id="bgParticles"></div>
+
+  <!--BAR--> 
+  <div style="position: relative; z-index: 1;">
+    <nav class="px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4">
+      <div class="max-w-7xl mx-auto">
+        <div class="glass-elevated rounded-xl sm:rounded-2xl px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4
+                    flex items-center justify-between gap-2 sm:gap-4">
+          <!-- Logo + text -->
+          <a href="index.html" class="flex items-center gap-2 sm:gap-3 min-w-0">
+            <img src="https://ik.imagekit.io/o2u9hny2s/trueland/trueland_icon.png"
+                alt="R.E.A.L"
+                class="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 object-contain shrink-0" loading="lazy"/>
+            <div class="leading-tight truncate">
+              <p class="text-[15px] sm:text-[18px] lg:text-[20px] uppercase tracking-wider font-bold text-white/90">R.E.A.L</p>
+              <!-- <p class="hidden sm:block text-[11px] sm:text-sm font-bold text-white truncate">Sàn giao dịch P2P</p> -->
+            </div>
+          </a>
+
+          <!-- Tabs: icon-only on mobile, scrollable pill bar -->
+          <div class="flex items-center gap-2 sm:gap-3">
+            <div role="tablist" class="hidden sm:flex items-center gap-2">
+              <button class="tab-btn tab-btn--sm" role="tab" aria-selected="true" id="tab-gallery" data-tab="gallery">
+                <i class="fas fa-th-large mr-0 sm:mr-2"></i><span>Sản phẩm</span>
+              </button>
+              <!-- <button class="tab-btn tab-btn--sm" role="tab" aria-selected="false" id="tab-broker" data-tab="broker">
+                <i class="fas fa-user-tie mr-0 sm:mr-2"></i><span>Đối tác môi giới</span>
+              </button> -->
+              <button class="tab-btn tab-btn--sm" role="tab" aria-selected="false" id="tab-lawyer" data-tab="lawyer">
+                <i class="fas fa-gavel mr-0 sm:mr-2"></i><span>AI tư vấn quy trình</span>
+              </button>
+              <button class="tab-btn tab-btn--sm" role="tab" aria-selected="false" id="tab-finance" data-tab="finance">
+                <i class="fas fa-chart-line mr-0 sm:mr-2"></i><span>Giải pháp tài chính</span>
+              </button>
+            
+              <!-- Account button replaces Logout after login -->
+              <button class="accountBtn hidden rounded-full border border-blue-200/60 px-3 py-1 text-blue-700 bg-white/70 transition hover:bg-blue-50">
+                <i class="fas fa-user mr-1"></i><span>Account</span>
+              </button>
+              <button class="loginToggleBtn rounded-full bg-slate-900 px-4 py-2 text-white transition hover:bg-slate-800 shadow-lg shadow-slate-900/20">
+                <i class="fas fa-sign-in-alt mr-1"></i><span data-i18n="login">Đăng nhập/Đăng ký</span>
+              </button>
+            </div>
+            <!-- HAMBURGER: chỉ hiện trên mobile -->
+            <button id="navMenuBtn"
+                    class="sm:hidden inline-flex items-center justify-center h-9 w-9 rounded-lg border border-white/30 text-white/90"
+                    aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M3 6h18v2H3V6zm0 5.5h18v2H3v-2zM3 17h18v2H3v-2z"/>
+              </svg>
+            </button>
+
+            <!-- MOBILE MENU (dropdown) — đặt ngay sau khối trên, vẫn nằm trong nav -->
+            <div id="mobileMenu" class="sm:hidden hidden">
+              <div id="navOverlay" class="nav-overlay"></div>
+              <aside class="mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobile menu">
+                <div class="drawer-header flex items-center justify-between px-4 py-3 border-b">
+                  <div class="flex items-center gap-2">
+                    <img src="https://ik.imagekit.io/o2u9hny2s/trueland/trueland_icon.png" alt="R.E.A.L" class="h-8 w-8 object-contain"/>
+                    <span class="font-semibold text-slate-800">Menu</span>
+                  </div>
+                  <button id="drawerCloseBtn" class="text-slate-700 hover:text-slate-900 font-semibold" aria-label="Close menu">
+                    <span class="text-xl" aria-hidden="true">&times;</span>
+                    <span class="ml-2">Đóng</span>
+                  </button>
+                </div>
+                <div class="drawer-content p-4">
+                  <!-- Screen: Menu full-screen -->
+                  <div id="drawerScreenMenu" class="drawer-screen h-full flex flex-col">
+                    <div class="MobileNavContent">
+                      <nav class="MegaMenuWrapper mobile">
+                        <div class="MegaMenu active">
+                          <div class="MegaMenu__Selector">
+                            <p class="MegaMenu__Title">Khám phá</p>
+                            <div class="MegaMenu__Caret" tabindex="0"></div>
+                          </div>
+                          <div class="MegaMenu__Dropdown">
+                            <div class="MenuList">
+                              <button class="mobile-tab-item" data-tab="gallery"><i class="fas fa-images mr-2"></i>Sản phẩm</button>
+                              <!-- <button class="mobile-tab-item" data-tab="broker"><i class="fas fa-user-tie mr-2"></i>Đối tác môi giới</button> -->
+                              <button class="mobile-tab-item" data-tab="lawyer"><i class="fas fa-scale-balanced mr-2"></i>AI tư vấn quy trình</button>
+                              <button class="mobile-tab-item" data-tab="finance"><i class="fas fa-chart-line mr-2"></i>Giải pháp tài chính</button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="MegaMenu">
+                          <div class="MegaMenu__Selector">
+                            <p class="MegaMenu__Title">Tài khoản</p>
+                            <div class="MegaMenu__Caret" tabindex="0"></div>
+                          </div>
+                          <div class="MegaMenu__Dropdown">
+                            <div class="MenuList">
+                              <button class="loginToggleBtn MenuLink"><i class="fas fa-right-to-bracket mr-2"></i>Đăng nhập/Đăng ký</button>
+                              <button class="accountBtn MenuLink hidden"><i class="fas fa-user mr-2"></i>Account</button>
+                            </div>
+                          </div>
+                        </div>
+                      </nav>
+                    </div>
+                  </div>
+
+                  <!-- Screen: Auth full-screen -->
+                  <div id="drawerScreenAuth" class="drawer-screen h-full hidden flex flex-col">
+                    <div class="simple-header flex items-center justify-between mb-4 px-1 py-2">
+                      <button id="authBackBtn" class="text-slate-700 hover:text-slate-900 font-medium" aria-label="Back">
+                        <span aria-hidden="true">&#8592;</span>
+                        <span class="ml-1">Quay lại</span>
+                      </button>
+                      <span class="font-semibold">Tài khoản</span>
+                      <button id="authCloseBtn" class="text-slate-700 hover:text-slate-900 font-semibold" aria-label="Close">
+                        <span class="text-lg" aria-hidden="true">&times;</span>
+                        <span class="ml-1">Đóng</span>
+                      </button>
+                    </div>
+                    <div class="flex gap-2 mb-3">
+                      <button id="drawerTabLogin" class="drawer-tab-btn active" type="button">Đăng nhập</button>
+                      <button id="drawerTabSignup" class="drawer-tab-btn" type="button">Đăng ký</button>
+                    </div>
+                    <form id="loginFormM" class="space-y-3">
+                      <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+                        <input type="email" id="emailM" required>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu</label>
+                        <input type="password" id="passwordM" required>
+                      </div>
+                      <label class="inline-flex items-center gap-2 text-xs text-slate-600">
+                        <input id="rememberMeM" type="checkbox" class="rounded border-slate-300"> Ghi nhớ đăng nhập
+                      </label>
+                      <button id="loginBtnM" type="submit" class="btn-primary w-full">Đăng nhập</button>
+                    </form>
+                    <form id="signupFormM" class="space-y-3 hidden">
+                      <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+                        <input type="email" id="su_emailM" required>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu</label>
+                        <input type="password" id="su_passwordM" minlength="6" required>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Số điện thoại (tuỳ chọn)</label>
+                        <input type="tel" id="su_phoneM" inputmode="numeric">
+                      </div>
+                      <button id="signupBtnM" type="submit" class="btn-primary w-full">Tạo tài khoản</button>
+                    </form>
+                  </div>
+                </div>
+              </aside>
+            </div>
+            
+            <!-- <div class="flex items-center gap-1.5 sm:gap-3">
+                <button id="langBtn" class="rounded-full border border-blue-200/60 bg-white/70 px-3 py-1 text-blue-700 hover:bg-blue-50 transition" title="Switch language">EN / VI</button>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </nav>
+
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 md:px-6 py-8">
+      <!-- <div class="glass-elevated rounded-3xl p-6 md:p-8"> -->
+        
+        <!-- Gallery Panel -->
+        <div id="panel-gallery" class="tab-panel" role="tabpanel">
+          <!-- Results Header -->
+          <div class="flex items-center justify-between mb-6">
+            <div class="text-sm">
+              <span id="resultsCount" class="text-2xl font-bold text-white">0</span>
+              <span class="text-white opacity-75 ml-2">kết quả</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button id="createassets" class="btn-primary">
+                <i class="fas fa-plus mr-2"></i>Tạo tài sản
+              </button>
+              <button id="filterToggleBtn" class="btn-secondary" title="Bộ lọc">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24">
+                  <path d="M3 4a1 1 0 0 1 .8-.4h16.4a1 1 0 0 1 .8 1.6l-6.5 8.1V20a1 1 0 0 1-1.4.9l-3-1.2a1 1 0 0 1-.6-.9v-5.1L3.2 5.2A1 1 0 0 1 3 4z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <!-- Filter Section (hidden by default; toggled by filter icon) -->
+          <div class="filter-section collapsed mb-8" aria-hidden="true">
+            <div class="glass rounded-2xl p-6">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-gray-800">
+                  <i class="fas fa-sliders-h text-blue-600 mr-2"></i>Bộ lọc tìm kiếm
+                </h3>
+                <button id="clearFiltersBtn" class="text-sm text-gray-600 hover:text-blue-600 transition">
+                  <i class="fas fa-redo mr-1"></i>Xóa bộ lọc
+                </button>
+              </div>
+
+              <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Loại giao dịch</label>
+                  <select id="filter_listing_type">
+                    <option value="">Tất cả</option>
+                    <option value="ban">Bán</option>
+                    <option value="cho_thue">Cho thuê</option>
+                    <option value="sang_nhuong">Sang nhượng</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Loại BĐS</label>
+                  <select id="filter_asset_type">
+                    <option value="">Tất cả</option>
+                    <option value="nha">Nhà</option>
+                    <option value="dat">Đất</option>
+                    <option value="can_ho">Căn hộ</option>
+                    <option value="van_phong">Văn phòng</option>
+                    <option value="kho_xuong">Kho xưởng</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Phân loại</label>
+                  <select id="filter_asset_subtype">
+                    <option value="">Tất cả</option>
+                    <option value="nha_pho">Nhà phố</option>
+                    <option value="biet_thu">Biệt thự</option>
+                    <option value="dat_nen">Đất nền</option>
+                    <option value="dat_vuon">Đất vườn</option>
+                    <option value="chung_cu">Chung cư</option>
+                    <option value="officetel">Officetel</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Pháp lý</label>
+                  <select id="filter_asset_legaltype">
+                    <option value="">Tất cả</option>
+                    <option value="so_hong">Sổ hồng/Sổ đỏ</option>
+                    <option value="so_do">Sổ đỏ</option>
+                    <option value="giay_tay">Giấy tay</option>
+                    <option value="hop_dong">Hợp đồng mua bán</option>
+                    <option value="dang_cap_so">Đang cấp sổ</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Tỉnh/Thành phố</label>
+                  <select id="filter_province">
+                    <option value="">Tất cả</option>
+                    <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                    <option value="Hà Nội">Hà Nội</option>
+                    <option value="Đà Nẵng">Đà Nẵng</option>
+                    <option value="Bình Dương">Bình Dương</option>
+                    <option value="Đồng Nai">Đồng Nai</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Quận/Huyện</label>
+                  <input type="text" id="filter_district" placeholder="VD: Quận 1, Quận 2...">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Phường/Xã</label>
+                  <input type="text" id="filter_city" placeholder="VD: Bến Nghé...">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Diện tích (m²)</label>
+                  <div class="flex gap-2">
+                    <input type="number" id="filter_square_min" placeholder="Từ" class="flex-1">
+                    <input type="number" id="filter_square_max" placeholder="Đến" class="flex-1">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Độ rộng mặt đường (m)</label>
+                  <input type="number" id="filter_main_street_width" placeholder="Tối thiểu...">
+                </div>
+
+                <div class="flex flex-col gap-3 justify-center">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="filter_mattien" class="w-4 h-4 rounded">
+                    <span class="text-sm font-medium">Mặt tiền</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="filter_alley" class="w-4 h-4 rounded">
+                    <span class="text-sm font-medium">Hẻm</span>
+                  </label>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Tìm kiếm</label>
+                  <input type="text" id="filter_search" placeholder="Tìm theo tiêu đề, mô tả...">
+                </div>
+
+                <div class="flex items-end">
+                  <button id="applyFiltersBtn" type="button" class="btn-primary w-full">
+                    <i class="fas fa-search mr-2"></i>Áp dụng
+                  </button>
+                </div>
+              </div>
+
+              <div id="activeFilters" class="hidden pt-4 border-t border-gray-200">
+                <div class="flex flex-wrap gap-2">
+                  <span class="text-xs text-gray-600">Đang lọc:</span>
+                  <div id="activeFilterTags" class="flex flex-wrap gap-2"></div>
+                </div>
+              </div>
+            </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div id="productsList" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3"></div>
+      <div class="text-center mt-8">
+        <button id="loadMoreBtn" onclick="loadMore()" 
+                class="btn-secondary px-8 py-3" style="display: none;">
+          <i class="fas fa-arrow-down mr-2"></i>Tải thêm
+        </button>
+      </div>
+    </div>
+
+    <!-- Create Asset Modal -->
+    <div id="createAssetModal" class="fixed inset-0 z-50 hidden">
+      <div id="camOverlay" class="absolute inset-0 bg-black/50"></div>
+      <div class="cam-panel relative mx-auto my-8 max-w-3xl bg-white rounded-2xl p-6 shadow-2xl">
+        <button id="camClose" class="absolute right-4 top-3 text-slate-500 hover:text-slate-800" aria-label="Đóng">&times;</button>
+        <h3 class="text-xl font-bold mb-4">Tạo tài sản</h3>
+        <form id="createAssetForm" class="grid gap-4 md:grid-cols-2">
+          <div class="md:col-span-2"><label class="text-sm font-medium">Tiêu đề</label><input id="ca_title" required></div>
+          <div class="md:col-span-2"><label class="text-sm font-medium">Mô tả</label><textarea id="ca_description" rows="3"></textarea></div>
+          <div><label class="text-sm font-medium">Loại giao dịch</label>
+            <select id="ca_listing_type" required>
+              <option value="ban">Bán</option>
+              <option value="cho_thue">Cho thuê</option>
+              <option value="sang_nhuong">Sang nhượng</option>
+            </select>
+          </div>
+          <div><label class="text-sm font-medium">Loại BĐS</label>
+            <select id="ca_asset_type" required>
+              <option value="nha">Nhà</option>
+              <option value="dat">Đất</option>
+              <option value="can_ho">Căn hộ</option>
+              <option value="van_phong">Văn phòng</option>
+              <option value="kho_xuong">Kho xưởng</option>
+            </select>
+          </div>
+          <div><label class="text-sm font-medium">Phân loại</label>
+            <select id="ca_asset_subtype">
+              <option value="">(Không)</option>
+              <option value="nha_pho">Nhà phố</option>
+              <option value="biet_thu">Biệt thự</option>
+              <option value="dat_nen">Đất nền</option>
+              <option value="dat_vuon">Đất vườn</option>
+              <option value="chung_cu">Chung cư</option>
+              <option value="officetel">Officetel</option>
+              <option value="nguyen_san">Nguyên sàn</option>
+            </select>
+          </div>
+          <div><label class="text-sm font-medium">Pháp lý</label>
+            <select id="ca_asset_legaltype">
+              <option value="so_hong">Sổ hồng/Sổ đỏ</option>
+              <option value="so_do">Sổ đỏ</option>
+              <option value="giay_tay">Giấy tay</option>
+              <option value="hop_dong">Hợp đồng mua bán</option>
+              <option value="dang_cap_so">Đang cấp sổ</option>
+            </select>
+          </div>
+          <div><label class="text-sm font-medium">Giá (VND)</label><input id="ca_price" type="number" step="0.01"></div>
+          <div><label class="text-sm font-medium">Diện tích (m²)</label><input id="ca_square" type="number" step="0.01"></div>
+          <div><label class="text-sm font-medium">Tỉnh/TP</label><input id="ca_province" required></div>
+          <div><label class="text-sm font-medium">Phường/Xã</label><input id="ca_city" required></div>
+          <div><label class="text-sm font-medium">Quận/Huyện</label><input id="ca_district" required></div>
+          <div><label class="text-sm font-medium">Đường chính</label><input id="ca_main_street"></div>
+          <div><label class="text-sm font-medium">Rộng đường (m)</label><input id="ca_main_street_width" type="number" step="0.01"></div>
+          <div class="flex items-center gap-2"><input id="ca_mattien" type="checkbox"><label class="text-sm">Mặt tiền</label></div>
+          <div class="flex items-center gap-2"><input id="ca_alley" type="checkbox"><label class="text-sm">Hẻm</label></div>
+          <div><label class="text-sm font-medium">Rộng hẻm (m)</label><input id="ca_alley_width" type="number" step="0.01"></div>
+          <div class="md:col-span-2"><label class="text-sm font-medium">Google Map Place ID</label><input id="ca_google_map_id"></div>
+          <div><label class="text-sm font-medium">Thửa đất ID</label><input id="ca_thua_dat_id" type="number"></div>
+          <div><label class="text-sm font-medium">Tờ bản đồ ID</label><input id="ca_to_ban_do_id" type="number"></div>
+          <div class="md:col-span-2"><label class="text-sm font-medium">Ảnh header</label><input id="ca_header" type="file" accept="image/*"></div>
+          <div class="md:col-span-2 flex justify-end gap-2 mt-2">
+            <button type="button" id="caCancel" class="btn-secondary">Hủy</button>
+            <button type="submit" class="btn-primary">Tạo</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+        <!-- Broker Panel -->
+        <div id="panel-broker" class="tab-panel" role="tabpanel" hidden>
+          <div class="text-center py-12">
+            <div class="glass rounded-2xl p-8 max-w-md mx-auto">
+              <i class="fas fa-user-tie text-6xl text-blue-600 mb-4"></i>
+              <h3 class="text-xl font-bold mb-2">Broker Services</h3>
+              <p class="text-gray-600 mb-6">Dịch vụ môi giới bất động sản chuyên nghiệp</p>
+              <button id="createBrokerBtn" class="btn-primary">
+                <i class="fas fa-user-plus mr-2"></i>Tạo profile broker
+              </button>
+            </div>
+          </div>
+          <div id="brokerList" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-8"></div>
+        </div>
+
+        <!-- Lawyer Panel -->
+        <div id="panel-lawyer" class="tab-panel" role="tabpanel" hidden>
+          <div class="glass rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-xl font-bold">AI tư vấn quy trình</h3>
+                <p class="text-xs text-gray-600 mt-1">AI chỉ tham khảo. Không thay thế tư vấn luật sư.</p>
+              </div>
+              <select id="aiModel" class="text-sm px-3 py-2 rounded-lg">
+                <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
+                <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                <option value="gemini-pro">gemini-pro</option>
+              </select>
+            </div>
+
+            <div id="aiChat" class="h-96 overflow-y-auto rounded-xl bg-white/50 p-4 mb-4 space-y-3">
+              <div class="flex gap-2">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <i class="fas fa-robot text-blue-600"></i>
+                </div>
+                <div class="glass rounded-2xl px-4 py-3 max-w-[80%]">
+                  <p class="text-sm">Chào bạn! Mô tả ngắn tình huống pháp lý và mục tiêu bạn cần nhé.</p>
+                </div>
+              </div>
+            </div>
+
+            <div id="aiTyping" class="hidden text-xs text-gray-500 mb-2">AI đang soạn trả lời...</div>
+
+            <form id="aiForm" class="flex gap-2">
+              <textarea id="aiInput" rows="2" 
+                class="flex-1 rounded-xl resize-none" 
+                placeholder="Nhập câu hỏi pháp lý..." required></textarea>
+              <button type="submit" class="btn-primary px-6">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </form>
+
+            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+              <p class="text-xs text-gray-500">
+                Lưu ý: Nội dung có thể không đầy đủ. Hãy kiểm chứng và liên hệ luật sư khi cần.
+              </p>
+              <button id="lawyerContactBtn" class="btn-secondary text-sm">
+                Liên hệ luật sư
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finance Panel -->
+        <div id="panel-finance" class="tab-panel" role="tabpanel" hidden>
+          <div class="text-center py-12">
+            <div class="glass rounded-2xl p-8 max-w-md mx-auto">
+              <i class="fas fa-chart-line text-6xl text-green-600 mb-4"></i>
+              <h3 class="text-xl font-bold mb-2">Financial Services</h3>
+              <p class="text-gray-600">Giải pháp tài chính: lãi suất, cho vay, ước tính dòng tiền...</p>
+            </div>
+          </div>
+        </div>
+
+      <!-- </div> -->
+    </main>
+  </div>
+
+  <!-- Overlay -->
+  <div id="overlay" class="overlay"></div>
+
+  <!-- Auth Panel -->
+  <div id="loginPanel" class="fixed top-0 right-0 h-full w-full max-w-md glass-elevated z-50 p-8 overflow-y-auto">
+    <button type="button" onclick="closeAuth()" class="absolute right-6 top-6 text-gray-400 hover:text-gray-600 text-xl">
+      <i class="fas fa-times"></i>
+    </button>
+
+    <h3 class="text-2xl font-bold mb-6">Tài khoản</h3>
+
+    <div class="flex gap-2 mb-6 p-1 bg-gray-100 rounded-xl">
+      <button type="button" id="tabLogin" class="flex-1 py-2 rounded-lg font-semibold transition" onclick="switchAuthTab('login')">
+        Đăng nhập
+      </button>
+      <button id="tabSignup" class="flex-1 py-2 rounded-lg font-semibold transition" onclick="switchAuthTab('signup')">
+        Đăng ký
+      </button>
+    </div>
+
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label for="email" class="block text-sm font-semibold mb-2">Email</label>
+        <input type="email" id="email" required>
+      </div>
+      <div>
+        <label for="password" class="block text-sm font-semibold mb-2">Mật khẩu</label>
+        <div class="relative">
+          <input type="password" id="password" required>
+          <button type="button" onclick="toggleEye('password')" 
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <i class="far fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      <label class="flex items-center gap-2 text-sm">
+        <input id="rememberMe" type="checkbox" class="w-4 h-4 rounded">
+        <span>Ghi nhớ đăng nhập</span>
+      </label>
+      <button id="loginBtn" type="submit" class="btn-primary w-full">
+        Đăng nhập
+      </button>
+    </form>
+
+    <form id="signupForm" class="space-y-4 hidden">
+      <div>
+        <label class="block text-sm font-semibold mb-2">Email</label>
+        <input type="email" id="su_email" required>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-2">Mật khẩu</label>
+        <div class="relative">
+          <input type="password" id="su_password" minlength="6" required>
+          <button type="button" onclick="toggleEye('su_password')" 
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <i class="far fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-2">Số điện thoại (tùy chọn)</label>
+        <input type="tel" id="su_phone" inputmode="numeric">
+      </div>
+      <button id="signupBtn" type="submit" class="btn-primary w-full">
+        Tạo tài khoản
+      </button>
+      <p class="text-xs text-gray-500 text-center">
+        Bằng việc đăng ký, bạn đồng ý với điều khoản & chính sách bảo mật.
+      </p>
+    </form>
+  </div>
+
+  <script>
+    // CLAUDE
+    // Pagination state
+      let currentPage = 0;
+      const itemsPerPage = 20;
+      let isLoading = false;
+      let hasMore = true;
+
+      // Debounce function
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+    // Create animated particles
+    (function createParticles() {
+      const container = document.getElementById('bgParticles');
+      if (!container) return;
+      
+      for (let i = 0; i < 15; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        const size = Math.random() * 80 + 20;
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+        particle.style.animationDelay = Math.random() * 5 + 's';
+        container.appendChild(particle);
+      }
+    })();
+
+    // API Configuration
+    const API_BASE = (function(){
+      const env = window.API_BASE || window.API_BASE;
+      if (env) return env.replace(/\/$/, '');
+      const host = location.hostname;
+      if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:8000';
+      return '/api';
+    })();
+
+    // Helper Functions
+    function getToken() { return localStorage.getItem("access_token") || ''; }
+    function getEmail() { return localStorage.getItem("user_email") || ''; }
+
+    const overlay = document.getElementById('overlay');
+    const panel = document.getElementById('loginPanel');
+
+    function openAuth(which='login'){
+      switchAuthTab(which);
+      overlay?.classList.add('show');
+      panel?.classList.add('slide-in');
+    }
+
+    function closeAuth(){
+      overlay?.classList.remove('show');
+      panel?.classList.remove('slide-in');
+    }
+
+    function switchAuthTab(which){
+      const isLogin = which === 'login';
+      const tabLogin = document.getElementById('tabLogin');
+      const tabSignup = document.getElementById('tabSignup');
+      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
+      
+      if (isLogin) {
+        tabLogin.classList.add('bg-white', 'shadow-md');
+        tabSignup.classList.remove('bg-white', 'shadow-md');
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+      } else {
+        tabSignup.classList.add('bg-white', 'shadow-md');
+        tabLogin.classList.remove('bg-white', 'shadow-md');
+        signupForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+      }
+    }
+
+    function toggleEye(inputId){
+      const el = document.getElementById(inputId);
+      if (!el) return;
+      const icon = el.nextElementSibling?.querySelector('i');
+      if (el.type === 'password') {
+        el.type = 'text';
+        if (icon) icon.className = 'fas fa-eye-slash';
+      } else {
+        el.type = 'password';
+        if (icon) icon.className = 'far fa-eye';
+      }
+    }
+
+    overlay?.addEventListener('click', closeAuth);
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeAuth(); });
+
+    function updateUIAfterLogin(email){
+      document.querySelectorAll('.accountBtn').forEach(btn => btn.classList.remove('hidden'));
+      document.querySelectorAll('.loginToggleBtn').forEach(btn => btn.classList.add('hidden'));
+    }
+
+    // Auth Functions
+    async function doLogin(email, password, remember){
+      const loginBtn = document.getElementById('loginBtn');
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Đang đăng nhập...';
+      
+      try{
+        const res = await fetch(`${API_BASE}/login`, {
+          method:'POST', 
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.detail || 'Đăng nhập thất bại');
+
+        if (!data.access_token) throw new Error('Thiếu access_token từ server');
+
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('user_email', data.email || email);
+        if (remember) localStorage.setItem('remember_me','1');
+        else localStorage.removeItem('remember_me');
+
+        updateUIAfterLogin(data.email || email);
+        closeAuth();
+
+        if (data.is_admin === true) location.href = 'monitor.html';
+      }catch(err){
+        alert(err.message || 'Lỗi kết nối');
+      }finally{
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = 'Đăng nhập';
+      }
+    }
+
+    async function doSignup(email, password, phone){
+      const signupBtn = document.getElementById('signupBtn');
+      signupBtn.disabled = true;
+      signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Đang đăng ký...';
+      
+      try{
+        const payload = { email, password };
+        if (phone) payload.phone = phone;
+        await window.httpPost(`${API_BASE}/register`, payload);
+        alert('Đăng ký thành công. Vui lòng đăng nhập.');
+        switchAuthTab('login');
+      }catch(err){
+        alert(err.message || 'Đăng ký thất bại');
+      }finally{
+        signupBtn.disabled = false;
+        signupBtn.innerHTML = 'Tạo tài khoản';
+      }
+    }
+
+    document.getElementById('loginForm')?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const remember = document.getElementById('rememberMe').checked;
+      doLogin(email, password, remember);
+    });
+
+    document.getElementById('signupForm')?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const email = document.getElementById('su_email').value.trim();
+      const password = document.getElementById('su_password').value;
+      const phone = document.getElementById('su_phone').value.trim();
+      if (password.length < 6){ alert('Mật khẩu tối thiểu 6 ký tự'); return; }
+      doSignup(email, password, phone);
+    });
+
+    // Account navigation
+    document.querySelectorAll('.accountBtn').forEach(btn => btn.addEventListener('click', ()=>{
+      if (!getToken()) { try{ openAuth('login'); }catch{} return; }
+      location.href = 'user.html';
+    }));
+    document.querySelectorAll('.loginToggleBtn').forEach(btn => btn.addEventListener('click', ()=>openAuth('login')));
+
+    // Tab Management
+    (function initTabs(){
+      const tabs = document.querySelectorAll('.tab-btn');
+      const panels = document.querySelectorAll('.tab-panel');
+      const filterToggle = document.getElementById('filterToggleBtn');
+
+      function activateTab(tabId){
+        tabs.forEach(btn => {
+          const isActive = btn.dataset.tab === tabId;
+          btn.setAttribute('aria-selected', String(isActive));
+        });
+        
+        panels.forEach(p => {
+          p.hidden = p.id !== `panel-${tabId}`;
+        });
+
+        // Show/hide filter toggle based on active tab
+        if (filterToggle) {
+          filterToggle.style.display = tabId === 'gallery' ? 'block' : 'none';
+        }
+      }
+
+      window.switchTab = activateTab;
+
+      // Gán click cho tabs desktop
+      tabs.forEach(btn => {
+        btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+      });
+
+      activateTab('gallery');
+    })();
+
+    // Filter Toggle
+    document.getElementById('filterToggleBtn')?.addEventListener('click', function(){
+      const filterSection = document.querySelector('.filter-section');
+      if (!filterSection) return;
+      filterSection.classList.toggle('collapsed');
+
+      const isCollapsed = filterSection.classList.contains('collapsed');
+      // keep aria state in sync
+      try { filterSection.setAttribute('aria-hidden', isCollapsed ? 'true' : 'false'); } catch {}
+      // If there is an <i> icon, toggle it (desktop may use SVG instead)
+      const ic = this.querySelector('i');
+      if (ic) {
+        ic.className = isCollapsed ? 'fas fa-filter' : 'fas fa-times';
+      }
+    });
+
+    // CLAUDE 17oct
+    // Load Gallery Products
+    async function loadGalleryProducts(params, append = false) {
+      if (isLoading) return;
+      
+      const box = document.getElementById('productsList');
+      const resultsCount = document.getElementById('resultsCount');
+      if (!box) return;
+
+      isLoading = true;
+      
+      // Add pagination params
+      if (!params) params = new URLSearchParams();
+      params.set('status', 'active');
+      params.set('limit', itemsPerPage);
+      params.set('offset', currentPage * itemsPerPage);
+
+      const url = `${API_BASE}/listings?${params.toString()}`;
+
+      // Show loading only on first load
+      if (!append) {
+        box.innerHTML = `
+          <div class="col-span-full flex flex-col items-center justify-center py-16">
+            <div class="loading-pulse w-16 h-16 bg-blue-500 rounded-full"></div>
+            <p class="mt-4 text-white font-medium">Đang tải...</p>
+          </div>`;
+      }
+
+      try {
+        const res = await fetch(url, { 
+          cache: 'no-store',
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const listings = await res.json();
+
+        // Update hasMore flag
+        hasMore = listings.length === itemsPerPage;
+
+        // Clear or append
+        if (!append) {
+          box.innerHTML = '';
+          if (resultsCount) resultsCount.textContent = listings.length;
+        }
+        
+        if (listings.length === 0 && !append) {
+          box.innerHTML = `
+            <div class="col-span-full text-center py-16">
+              <i class="fas fa-search text-6xl text-white opacity-50 mb-4"></i>
+              <p class="text-white text-lg font-medium">Không tìm thấy tài sản phù hợp</p>
+              <button onclick="clearFiltersAndReload()" class="mt-4 btn-secondary">
+                <i class="fas fa-redo mr-2"></i>Xóa bộ lọc
+              </button>
+            </div>`;
+          return;
+        }
+
+        listings.forEach((l, index) => {
+          const imgId = (l.user_id ?? l.listing_id ?? l.id);
+          const priceNum = l.price != null ? Number(l.price) : null;
+          const priceText = priceNum != null && !isNaN(priceNum)
+            ? `${priceNum.toLocaleString('vi-VN')} VND` 
+            : 'Giá thương lượng';
+          
+          const card = document.createElement('div');
+          card.className = 'product-card p-6';
+          card.style.animationDelay = `${index * 0.05}s`;
+          card.innerHTML = `
+            <div class="mb-4 rounded-xl overflow-hidden bg-slate-100">
+              <img src="https://ik.imagekit.io/o2u9hny2s/trueland/users/${imgId}/header.jpg?v=${encodeURIComponent(l.image_version || l.created_at || "")}"
+                   data-img-url="https://ik.imagekit.io/o2u9hny2s/trueland/users/${imgId}/header.jpg?v=${encodeURIComponent(l.image_version || l.created_at || "")}"
+                   data-listing-id="${imgId}"
+                   alt="${(l.title || '').replace(/\"/g,'&quot;')}"
+                   class="w-full h-48 object-cover"
+                   loading="lazy"
+                   onerror="this.onerror=null;this.src='https://ik.imagekit.io/o2u9hny2s/trueland/trueland_icon.png';"/>
+            </div>
+            <div class="flex items-start justify-between mb-4">
+              <h3 class="font-bold text-lg text-gray-900 line-clamp-2 flex-1">${l.title || '—'}</h3>
+              ${l.mattien ? '<span class="ml-2 badge bg-green-100 text-green-700">MT</span>' : ''}
+            </div>
+            
+            <div class="flex items-center gap-2 text-xs text-gray-600 mb-3">
+              <i class="fas fa-map-marker-alt text-red-500"></i>
+              <span class="line-clamp-1">${[l.district, l.city, l.province].filter(Boolean).join(', ')}</span>
+            </div>
+
+            <p class="text-sm text-gray-700 line-clamp-2 mb-4">${l.description || ''}</p>
+
+            <div class="flex items-center gap-2 mb-4">
+              <span class="badge bg-blue-100 text-blue-700">${l.asset_type || '—'}</span>
+              ${l.alley ? '<span class="badge bg-orange-100 text-orange-700"><i class="fas fa-road mr-1"></i>Hẻm</span>' : ''}
+            </div>
+
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+              <div>
+                <p class="text-xs text-gray-500">Giá</p>
+                <p class="text-xl font-bold text-blue-600">${priceText}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs text-gray-500">Diện tích</p>
+                <p class="text-lg font-semibold">${l.square ? Number(l.square).toLocaleString('vi-VN') + ' m²' : '—'}</p>
+              </div>
+            </div>
+          `;
+          
+          card.addEventListener('click', () => viewListingDetail(l.listing_id));
+          box.appendChild(card);
+        });
+
+        // Add "Load More" button if has more items
+        if (hasMore && append) {
+          const loadMoreBtn = document.getElementById('loadMoreBtn');
+          if (loadMoreBtn) loadMoreBtn.style.display = 'block';
+        } else if (!hasMore) {
+          const loadMoreBtn = document.getElementById('loadMoreBtn');
+          if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+        }
+
+      } catch (err) {
+        console.error('[ERROR]', err);
+        box.innerHTML = `
+          <div class="col-span-full text-center py-16">
+            <i class="fas fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
+            <p class="text-white text-lg font-medium mb-2">Không tải được danh sách</p>
+            <p class="text-white opacity-75 text-sm">${err?.message || err}</p>
+            <button onclick="loadGalleryProducts()" class="mt-4 btn-primary">
+              <i class="fas fa-redo mr-2"></i>Thử lại
+            </button>
+          </div>`;
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    // Load more function
+    function loadMore() {
+      currentPage++;
+      const params = buildFilterParams();
+      loadGalleryProducts(params, true);
+    }
+
+    // Reset and reload
+    function clearFiltersAndReload() {
+      document.getElementById('clearFiltersBtn')?.click();
+      currentPage = 0;
+      hasMore = true;
+    }
+
+    // View Listing Detail
+    async function viewListingDetail(listingId) {
+      try {
+        const res = await fetch(`${API_BASE}/listings/${listingId}`);
+        const listing = await res.json();
+        
+        if (!res.ok) throw new Error('Không thể tải thông tin');
+
+        const priceText = listing.price ? parseFloat(listing.price).toLocaleString('vi-VN') + ' VND' : 'Liên hệ';
+
+        const modalHTML = `
+          <div id="detailModal" class="modal-backdrop fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center px-4 py-8" onclick="closeDetailModal(event)">
+            <div class="modal-content glass-elevated w-full max-w-3xl rounded-3xl p-8 relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+              <button onclick="closeDetailModal()" class="absolute right-6 top-6 text-gray-400 hover:text-gray-600 text-xl">
+                <i class="fas fa-times"></i>
+              </button>
+              
+              <h2 class="text-3xl font-bold text-gray-900 mb-6 pr-8">${listing.title}</h2>
+              
+              <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <div class="glass rounded-2xl p-6">
+                  <p class="text-xs text-gray-500 uppercase mb-2">Giá</p>
+                  <p class="text-3xl font-bold text-blue-600">${priceText}</p>
+                </div>
+                <div class="glass rounded-2xl p-6">
+                  <p class="text-xs text-gray-500 uppercase mb-2">Diện tích</p>
+                  <p class="text-3xl font-bold text-gray-900">${listing.square || '—'} m²</p>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">Loại BĐS</p>
+                  <p class="font-semibold">${listing.asset_type} - ${listing.asset_subtype}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">Pháp lý</p>
+                  <p class="font-semibold">${listing.asset_legaltype}</p>
+                </div>
+                <div class="md:col-span-2">
+                  <p class="text-xs text-gray-500 mb-1">Địa chỉ</p>
+                  <p class="font-semibold">${[listing.main_street, listing.district, listing.city, listing.province].filter(Boolean).join(', ')}</p>
+                </div>
+              </div>
+
+              ${listing.description ? `
+                <div class="mb-6">
+                  <p class="text-xs text-gray-500 mb-2">Mô tả</p>
+                  <p class="text-gray-700 leading-relaxed">${listing.description}</p>
+                </div>
+              ` : ''}
+
+              <div class="flex gap-3 mb-6">
+                ${listing.mattien ? '<span class="badge bg-green-100 text-green-700"><i class="fas fa-check-circle mr-1"></i>Mặt tiền</span>' : ''}
+                ${listing.alley ? `<span class="badge bg-orange-100 text-orange-700"><i class="fas fa-road mr-1"></i>Hẻm ${listing.alley_width || '—'} m</span>` : ''}
+              </div>
+
+              <button onclick="contactOwner(${listing.listing_id})" class="btn-primary w-full text-lg py-4">
+                <i class="fas fa-phone mr-2"></i>Liên hệ người bán
+              </button>
+            </div>
+          </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+      } catch (error) {
+        alert('Lỗi: ' + error.message);
+      }
+    }
+
+    function closeDetailModal(event) {
+      if (!event || event.target.id === 'detailModal') {
+        document.getElementById('detailModal')?.remove();
+      }
+    }
+
+    function contactOwner(listingId) {
+      alert(`Liên hệ chủ BĐS #${listingId}\n\n(Chức năng đang phát triển)`);
+    }
+
+    // // Filter Management
+    // (function initFilters() {
+    //   const filterForm = {
+    //     listing_type: document.getElementById('filter_listing_type'),
+    //     asset_type: document.getElementById('filter_asset_type'),
+    //     asset_subtype: document.getElementById('filter_asset_subtype'),
+    //     asset_legaltype: document.getElementById('filter_asset_legaltype'),
+    //     province: document.getElementById('filter_province'),
+    //     district: document.getElementById('filter_district'),
+    //     city: document.getElementById('filter_city'),
+    //     square_min: document.getElementById('filter_square_min'),
+    //     square_max: document.getElementById('filter_square_max'),
+    //     main_street_width: document.getElementById('filter_main_street_width'),
+    //     mattien: document.getElementById('filter_mattien'),
+    //     alley: document.getElementById('filter_alley'),
+    //     search: document.getElementById('filter_search')
+    //   };
+
+    //   const applyBtn = document.getElementById('applyFiltersBtn');
+    //   const clearBtn = document.getElementById('clearFiltersBtn');
+    //   const activeFiltersDiv = document.getElementById('activeFilters');
+    //   const activeFilterTags = document.getElementById('activeFilterTags');
+    //   const filterBadge = document.getElementById('filterBadge');
+
+    //   function buildFilterParams() {
+    //     const params = new URLSearchParams();
+    //     params.set('status', 'active');
+        
+    //     // Helper function to safely add param
+    //     const addParam = (key, value) => {
+    //       if (value && typeof value === 'string' && value.trim() !== '') {
+    //         params.set(key, value.trim());
+    //       }
+    //     };
+        
+    //     // Text filters
+    //     addParam('listing_type', filterForm.listing_type?.value);
+    //     addParam('asset_type', filterForm.asset_type?.value);
+    //     addParam('asset_subtype', filterForm.asset_subtype?.value);
+    //     addParam('asset_legaltype', filterForm.asset_legaltype?.value);
+    //     addParam('province', filterForm.province?.value);
+    //     addParam('district', filterForm.district?.value);
+    //     addParam('city', filterForm.city?.value);
+        
+    //     // Number filters
+    //     addParam('square_min', filterForm.square_min?.value);
+    //     addParam('square_max', filterForm.square_max?.value);
+    //     addParam('main_street_width', filterForm.main_street_width?.value);
+        
+    //     // Boolean filters
+    //     if (filterForm.mattien?.checked) {
+    //       params.set('mattien', 'true');
+    //     }
+    //     if (filterForm.alley?.checked) {
+    //       params.set('alley', 'true');
+    //     }
+        
+    //     // Search query
+    //     addParam('q', filterForm.search?.value);
+        
+    //     // 🔍 DEBUG
+    //     console.log('Filter form values:', {
+    //       listing_type: filterForm.listing_type?.value,
+    //       asset_type: filterForm.asset_type?.value,
+    //       province: filterForm.province?.value,
+    //       mattien: filterForm.mattien?.checked,
+    //       alley: filterForm.alley?.checked
+    //     });
+        
+    //     return params;
+    //   }
+
+    //   function displayActiveFilters() {
+    //     const activeCount = Array.from(Object.values(filterForm)).filter(el => {
+    //       if (el.type === 'checkbox') return el.checked;
+    //       return el.value && el.value.trim() !== '';
+    //     }).length;
+
+    //     if (activeCount === 0) {
+    //       activeFiltersDiv.classList.add('hidden');
+    //       filterBadge.classList.add('hidden');
+    //       return;
+    //     }
+
+    //     activeFiltersDiv.classList.remove('hidden');
+    //     filterBadge.classList.remove('hidden');
+    //     filterBadge.textContent = activeCount;
+    //     activeFilterTags.innerHTML = '';
+
+    //     const labelMap = {
+    //       listing_type: 'Loại GD',
+    //       asset_type: 'Loại BĐS',
+    //       asset_subtype: 'Phân loại',
+    //       asset_legaltype: 'Pháp lý',
+    //       province: 'Tỉnh/TP',
+    //       district: 'Quận/Huyện',
+    //       city: 'Phường/Xã',
+    //       square_min: 'DT từ',
+    //       square_max: 'DT đến',
+    //       main_street_width: 'Đường ≥',
+    //       mattien: 'Mặt tiền',
+    //       alley: 'Hẻm',
+    //       search: 'Tìm kiếm'
+    //     };
+
+    //     Object.entries(filterForm).forEach(([key, el]) => {
+    //       let value = null;
+    //       if (el.type === 'checkbox') {
+    //         if (el.checked) value = '✓';
+    //       } else {
+    //         value = el.value.trim();
+    //       }
+
+    //       if (value) {
+    //         const tag = document.createElement('span');
+    //         tag.className = 'badge bg-blue-100 text-blue-700';
+    //         tag.innerHTML = `${labelMap[key]}: ${value}`;
+    //         activeFilterTags.appendChild(tag);
+    //       }
+    //     });
+    //   }
+
+    //   // async function applyFilters() {
+    //   //   displayActiveFilters();
+        
+    //   //   // ✅ CRITICAL: Reset pagination khi apply filter mới
+    //   //   currentPage = 0;
+    //   //   hasMore = true;
+        
+    //   //   const params = buildFilterParams();
+    //   //   await loadGalleryProducts(params, false); // false = không append
+    //   // }
+    //   async function applyFilters() {
+    //     displayActiveFilters();
+        
+    //     currentPage = 0;
+    //     hasMore = true;
+        
+    //     const params = buildFilterParams();
+        
+    //     // 🔍 DEBUG: Xem params thực tế
+    //     console.log('=== FILTER DEBUG ===');
+    //     console.log('URL params:', params.toString());
+    //     console.log('Full URL:', `${API_BASE}/listings?${params.toString()}`);
+        
+    //     await loadGalleryProducts(params, false);
+    //   }
+    //   function clearFilters() {
+    //     Object.values(filterForm).forEach(el => {
+    //       if (el.type === 'checkbox') el.checked = false;
+    //       else el.value = '';
+    //     });
+    //     displayActiveFilters();
+    //     currentPage = 0; hasMore = true;
+    //     loadGalleryProducts(new URLSearchParams({ status: 'active' }));
+    //   }
+
+    //   applyBtn?.addEventListener('click', (e)=>{ e.preventDefault(); applyFilters(); });
+    //   clearBtn?.addEventListener('click', clearFilters);
+
+    //   filterForm.search?.addEventListener('keypress', (e) => {
+    //     if (e.key === 'Enter') {
+    //       e.preventDefault();
+    //       applyFilters();
+    //     }
+    //   });
+    // })();
+
+    // ========================================
+    // Filter Management (FIXED VERSION)
+    // ========================================
+    const filterForm = {
+      listing_type: document.getElementById('filter_listing_type'),
+      asset_type: document.getElementById('filter_asset_type'),
+      asset_subtype: document.getElementById('filter_asset_subtype'),
+      asset_legaltype: document.getElementById('filter_asset_legaltype'),
+      province: document.getElementById('filter_province'),
+      district: document.getElementById('filter_district'),
+      city: document.getElementById('filter_city'),
+      square_min: document.getElementById('filter_square_min'),
+      square_max: document.getElementById('filter_square_max'),
+      main_street_width: document.getElementById('filter_main_street_width'),
+      mattien: document.getElementById('filter_mattien'),
+      alley: document.getElementById('filter_alley'),
+      search: document.getElementById('filter_search')
+    };
+
+    // ✅ EXPOSE TO GLOBAL SCOPE
+    window.buildFilterParams = function() {
+      const params = new URLSearchParams();
+      params.set('status', 'active');
+      
+      // Helper to safely add param
+      const addParam = (key, value) => {
+        if (value && typeof value === 'string' && value.trim() !== '') {
+          params.set(key, value.trim());
+        }
+      };
+      
+      // Text filters
+      addParam('listing_type', filterForm.listing_type?.value);
+      addParam('asset_type', filterForm.asset_type?.value);
+      addParam('asset_subtype', filterForm.asset_subtype?.value);
+      addParam('asset_legaltype', filterForm.asset_legaltype?.value);
+      addParam('province', filterForm.province?.value);
+      addParam('district', filterForm.district?.value);
+      addParam('city', filterForm.city?.value);
+      
+      // Number filters
+      addParam('square_min', filterForm.square_min?.value);
+      addParam('square_max', filterForm.square_max?.value);
+      addParam('main_street_width', filterForm.main_street_width?.value);
+      
+      // Boolean filters
+      if (filterForm.mattien?.checked) {
+        params.set('mattien', 'true');
+      }
+      if (filterForm.alley?.checked) {
+        params.set('alley', 'true');
+      }
+      
+      // Search query
+      addParam('q', filterForm.search?.value);
+      
+      // 🔍 DEBUG
+      console.log('=== FILTER PARAMS ===');
+      console.log('Raw form values:', {
+        listing_type: filterForm.listing_type?.value,
+        asset_type: filterForm.asset_type?.value,
+        province: filterForm.province?.value,
+        mattien: filterForm.mattien?.checked,
+        alley: filterForm.alley?.checked
+      });
+      console.log('URL params:', params.toString());
+      console.log('Full URL:', `${API_BASE}/listings?${params.toString()}`);
+      
+      return params;
+    };
+
+    // Display active filters
+    function displayActiveFilters() {
+      const activeFiltersDiv = document.getElementById('activeFilters');
+      const activeFilterTags = document.getElementById('activeFilterTags');
+      
+      const activeCount = Array.from(Object.values(filterForm)).filter(el => {
+        if (el.type === 'checkbox') return el.checked;
+        return el.value && el.value.trim() !== '';
+      }).length;
+
+      if (activeCount === 0) {
+        activeFiltersDiv?.classList.add('hidden');
+        return;
+      }
+
+      activeFiltersDiv?.classList.remove('hidden');
+      if (activeFilterTags) activeFilterTags.innerHTML = '';
+
+      const labelMap = {
+        listing_type: 'Loại GD',
+        asset_type: 'Loại BĐS',
+        asset_subtype: 'Phân loại',
+        asset_legaltype: 'Pháp lý',
+        province: 'Tỉnh/TP',
+        district: 'Quận/Huyện',
+        city: 'Phường/Xã',
+        square_min: 'DT từ',
+        square_max: 'DT đến',
+        main_street_width: 'Đường ≥',
+        mattien: 'Mặt tiền',
+        alley: 'Hẻm',
+        search: 'Tìm kiếm'
+      };
+
+      Object.entries(filterForm).forEach(([key, el]) => {
+        let value = null;
+        if (el.type === 'checkbox') {
+          if (el.checked) value = '✓';
+        } else {
+          value = el.value.trim();
+        }
+
+        if (value && activeFilterTags) {
+          const tag = document.createElement('span');
+          tag.className = 'badge bg-blue-100 text-blue-700';
+          tag.innerHTML = `${labelMap[key]}: ${value}`;
+          activeFilterTags.appendChild(tag);
+        }
+      });
+    }
+
+    // Apply filters
+    async function applyFilters() {
+      console.log('🔍 applyFilters() called');
+      displayActiveFilters();
+      
+      currentPage = 0;
+      hasMore = true;
+      
+      const params = window.buildFilterParams();
+      console.log('📤 Sending request with params:', params.toString());
+      
+      await loadGalleryProducts(params, false);
+    }
+
+    // Clear filters
+    function clearFilters() {
+      console.log('🧹 Clearing filters...');
+      Object.values(filterForm).forEach(el => {
+        if (el.type === 'checkbox') el.checked = false;
+        else el.value = '';
+      });
+      displayActiveFilters();
+      currentPage = 0;
+      hasMore = true;
+      loadGalleryProducts(new URLSearchParams({ status: 'active' }));
+    }
+
+    // Bind events
+    document.getElementById('applyFiltersBtn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('✅ Apply button clicked');
+      applyFilters();
+    });
+
+    document.getElementById('clearFiltersBtn')?.addEventListener('click', clearFilters);
+
+    document.getElementById('filter_search')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyFilters();
+      }
+    });
+
+    // Initialize
+    document.addEventListener("DOMContentLoaded", () => {
+      // Ensure filter panel is hidden by default and inputs are at 'All'
+      const fs = document.querySelector('.filter-section');
+      if (fs) {
+        fs.classList.add('collapsed');
+        fs.setAttribute('aria-hidden', 'true');
+      }
+      // Reset all filter controls to default (All/empty)
+      const defaults = [
+        'filter_listing_type','filter_asset_type','filter_asset_subtype','filter_asset_legaltype',
+        'filter_province','filter_district','filter_city','filter_square_min','filter_square_max',
+        'filter_main_street_width','filter_search'
+      ];
+      defaults.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      ['filter_mattien','filter_alley'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
+
+      if (getToken()) updateUIAfterLogin(getEmail());
+      loadGalleryProducts(new URLSearchParams({ status: 'active' }));
+
+      // Support deep-link to open Create Asset modal
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('create') === '1' || window.location.hash === '#create') {
+          const trigger = document.getElementById('createassets');
+          // Slight delay to ensure listeners are ready
+          setTimeout(()=> trigger?.click(), 100);
+        }
+      } catch {}
+    });
+
+     //  AREA FOR FEATURE TABS (GALLERY, SERVICES) 
+        (() => {
+      const btn  = document.getElementById('navMenuBtn');
+      const menu = document.getElementById('mobileMenu');
+      if(!btn || !menu) return;
+      const iconBars = document.getElementById('navIconBars');
+      const iconClose = document.getElementById('navIconClose');
+
+      // Toggle menu
+      btn.addEventListener('click', () => {
+        const isOpen = menu.classList.contains('open');
+        if (isOpen) {
+          menu.classList.remove('open');
+          menu.classList.add('hidden');
+          btn.setAttribute('aria-expanded','false');
+          iconClose?.classList.add('hidden');
+          iconBars?.classList.remove('hidden');
+          document.body.classList.remove('drawer-open');
+        } else {
+          menu.classList.remove('hidden');
+          menu.classList.add('open');
+          btn.setAttribute('aria-expanded','true');
+          iconBars?.classList.add('hidden');
+          iconClose?.classList.remove('hidden');
+          document.body.classList.add('drawer-open');
+        }
+      });
+
+      // Click ngoài để đóng
+      document.addEventListener('click', (e) => {
+        if(menu.classList.contains('hidden')) return;
+        if(!menu.contains(e.target) && !btn.contains(e.target)){
+          menu.classList.remove('open');
+          menu.classList.add('hidden');
+          btn.setAttribute('aria-expanded','false');
+          iconClose?.classList.add('hidden');
+          iconBars?.classList.remove('hidden');
+          document.body.classList.remove('drawer-open');
+        }
+      });
+
+      // Chọn mục trong menu => switchTab + đồng bộ aria-selected
+        menu.querySelectorAll('.mobile-tab-item').forEach(it => {
+          it.addEventListener('click', () => {
+            const tab = it.getAttribute('data-tab');
+            const targetBtn = document.getElementById(`tab-${tab}`);
+
+            if (targetBtn) {
+              targetBtn.focus();
+              targetBtn.click(); // <-- quan trọng: giả click như desktop
+            } else if (typeof window.switchTab === 'function') {
+              window.switchTab(tab); // fallback
+            }
+
+            menu.classList.remove('open');
+            menu.classList.add('hidden');
+            btn.setAttribute('aria-expanded','false');
+            iconClose?.classList.add('hidden');
+            iconBars?.classList.remove('hidden');
+            document.body.classList.remove('drawer-open');
+          });
+        });
+
+      // Nếu resize sang ≥640px thì đóng menu
+      const mql = window.matchMedia('(min-width: 640px)');
+      mql.addEventListener?.('change', e => {
+        if(e.matches){ menu.classList.remove('open'); menu.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); document.body.classList.remove('drawer-open'); }
+      });
+    })();
+
+    // Drawer extras: overlay, close button, and inline auth toggle
+    (() => {
+      const menu = document.getElementById('mobileMenu');
+      const overlay = document.getElementById('navOverlay');
+      const closeBtn = document.getElementById('drawerCloseBtn');
+      const iconBars = document.getElementById('navIconBars');
+      const iconClose = document.getElementById('navIconClose');
+
+      // Move login/signup forms into Account MegaMenu dropdown and rename title
+      try {
+        const wrapper = menu.querySelector('.MegaMenuWrapper.mobile');
+        if (wrapper) {
+          const megaMenus = wrapper.querySelectorAll('.MegaMenu');
+          const account = megaMenus[1];
+          if (account) {
+            const titleEl = account.querySelector('.MegaMenu__Title');
+            if (titleEl) titleEl.textContent = 'Đăng nhập/Đăng ký';
+
+            const dropdown = account.querySelector('.MegaMenu__Dropdown .MenuList') || account.querySelector('.MegaMenu__Dropdown');
+            const loginForm = document.getElementById('loginFormM');
+            const signupForm = document.getElementById('signupFormM');
+            if (dropdown && loginForm && signupForm) {
+              // Clear old items and inject tabs + forms
+              dropdown.innerHTML = '';
+              const tabs = document.createElement('div');
+              tabs.className = 'flex gap-2 mb-2';
+              tabs.innerHTML = '<button id="drawerTabLogin" class="drawer-tab-btn active" type="button">Đăng nhập</button>'+
+                               '<button id="drawerTabSignup" class="drawer-tab-btn" type="button">Đăng ký</button>';
+              dropdown.appendChild(tabs);
+              dropdown.appendChild(loginForm);
+              dropdown.appendChild(signupForm);
+            }
+            const screenAuth = document.getElementById('drawerScreenAuth');
+            if (screenAuth) { screenAuth.innerHTML = ''; screenAuth.style.display = 'none'; }
+          }
+        }
+      } catch {}
+
+      // Get tabs (after possible injection)
+      const tabLoginBtn = document.getElementById('drawerTabLogin');
+      const tabSignupBtn = document.getElementById('drawerTabSignup');
+        function closeDrawer(){
+          menu.classList.remove('open'); menu.classList.add('hidden');
+          // reset toggle icon
+          const btn = document.getElementById('navMenuBtn');
+          btn?.setAttribute('aria-expanded','false');
+          iconClose?.classList.add('hidden');
+          iconBars?.classList.remove('hidden');
+          document.body.classList.remove('drawer-open');
+        }
+        function openDrawerAuth(which='login'){
+          if (!screenMenu || !screenAuth) return;
+          screenMenu.classList.add('hidden');
+          screenAuth.classList.remove('hidden');
+          const isLogin = which === 'login';
+          document.getElementById('loginFormM')?.classList.toggle('hidden', !isLogin);
+          document.getElementById('signupFormM')?.classList.toggle('hidden', isLogin);
+          tabLoginBtn?.classList.toggle('active', isLogin);
+          tabSignupBtn?.classList.toggle('active', !isLogin);
+        }
+        window.openDrawerAuth = openDrawerAuth;
+
+      overlay?.addEventListener('click', closeDrawer);
+      closeBtn?.addEventListener('click', closeDrawer);
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeDrawer(); });
+
+      // Tabs toggle
+      tabLoginBtn?.addEventListener('click', ()=>{
+        tabLoginBtn.classList.add('active'); tabSignupBtn?.classList.remove('active');
+        document.getElementById('loginFormM')?.classList.remove('hidden');
+        document.getElementById('signupFormM')?.classList.add('hidden');
+      });
+      tabSignupBtn?.addEventListener('click', ()=>{
+        tabSignupBtn.classList.add('active'); tabLoginBtn?.classList.remove('active');
+        document.getElementById('signupFormM')?.classList.remove('hidden');
+        document.getElementById('loginFormM')?.classList.add('hidden');
+      });
+
+      // Bind login toggle inside drawer to inline auth panel
+      document.querySelectorAll('.loginToggleBtn').forEach(el => {
+        el.addEventListener('click', (e) => {
+          if (el.closest('.mobile-drawer')) {
+            e.preventDefault();
+            // Expand account menu and show login tab
+            const wrapper = menu.querySelector('.MegaMenuWrapper.mobile');
+            const account = wrapper?.querySelectorAll('.MegaMenu')[1];
+            if (account){
+              wrapper.querySelectorAll('.MegaMenu').forEach(m => m.classList.remove('active'));
+              account.classList.add('active');
+            }
+            const tL = document.getElementById('drawerTabLogin');
+            const tS = document.getElementById('drawerTabSignup');
+            tL?.classList.add('active'); tS?.classList.remove('active');
+            document.getElementById('loginFormM')?.classList.remove('hidden');
+            document.getElementById('signupFormM')?.classList.add('hidden');
+          } else {
+            e.preventDefault(); openAuth('login');
+          }
+        });
+      });
+
+      // Bind Account across duplicates
+      document.querySelectorAll('.accountBtn').forEach(el => el.addEventListener('click', ()=>{
+        if (!getToken()) { try{ openAuth('login'); }catch{} return; }
+        location.href = 'user.html';
+      }));
+
+      // Mobile auth submit handlers
+      document.getElementById('loginFormM')?.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const email = document.getElementById('emailM').value.trim();
+        const password = document.getElementById('passwordM').value;
+        const remember = document.getElementById('rememberMeM').checked;
+        const btnM = document.getElementById('loginBtnM');
+        if (btnM){ btnM.disabled = true; btnM.innerHTML = '<i class=\"fas fa-spinner fa-spin mr-2\"></i>Đang đăng nhập...'; }
+        try{
+          const res = await fetch(`${API_BASE}/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || 'Đăng nhập thất bại');
+          if (!data.access_token) throw new Error('Thiếu access_token từ server');
+          localStorage.setItem('access_token', data.access_token);
+          localStorage.setItem('user_email', data.email || email);
+          if (remember) localStorage.setItem('remember_me','1'); else localStorage.removeItem('remember_me');
+          updateUIAfterLogin(data.email || email);
+          closeDrawer();
+          if (data.is_admin === true) location.href = 'monitor.html';
+        }catch(err){
+          alert(err.message || 'Lỗi kết nối');
+        }finally{
+          if (btnM){ btnM.disabled = false; btnM.innerHTML = 'Đăng nhập'; }
+        }
+      });
+
+      document.getElementById('signupFormM')?.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const email = document.getElementById('su_emailM').value.trim();
+        const password = document.getElementById('su_passwordM').value;
+        const phone = document.getElementById('su_phoneM').value.trim();
+        const btnM = document.getElementById('signupBtnM');
+        if (password.length < 6){ alert('Mật khẩu tối thiểu 6 ký tự'); return; }
+        if (btnM){ btnM.disabled = true; btnM.innerHTML = '<i class=\"fas fa-spinner fa-spin mr-2\"></i>Đang đăng ký...'; }
+        try{
+          const payload = { email, password }; if (phone) payload.phone = phone;
+          await window.httpPost(`${API_BASE}/register`, payload);
+          alert('Đăng ký thành công. Vui lòng đăng nhập.');
+          // Switch to login tab inline
+          const tL = document.getElementById('drawerTabLogin');
+          const tS = document.getElementById('drawerTabSignup');
+          tL?.classList.add('active'); tS?.classList.remove('active');
+          document.getElementById('loginFormM')?.classList.remove('hidden');
+          document.getElementById('signupFormM')?.classList.add('hidden');
+        }catch(err){
+          alert(err.message || 'Đăng ký thất bại');
+        }finally{
+          if (btnM){ btnM.disabled = false; btnM.innerHTML = 'Tạo tài khoản'; }
+        }
+      });
+
+      // MegaMenu toggle (accordion)
+      const selectors = menu.querySelectorAll('.MegaMenu__Selector');
+      selectors.forEach(sel => {
+        sel.addEventListener('click', () => {
+          const mm = sel.closest('.MegaMenu');
+          const wasActive = mm.classList.contains('active');
+          menu.querySelectorAll('.MegaMenu').forEach(m => m.classList.remove('active'));
+          if (!wasActive) mm.classList.add('active');
+        });
+      });
+    })();
+
+    // Toggle Account vs Login buttons based on auth
+    (function ensureAccountNav(){
+      async function apply(){
+        const accEls = document.querySelectorAll('.accountBtn, #accountBtn');
+        const loginEls = document.querySelectorAll('.loginToggleBtn, #loginToggleBtn');
+        const hide = (els)=> els.forEach(el => el.classList.add('hidden'));
+        const show = (els)=> els.forEach(el => el.classList.remove('hidden'));
+        const token = (typeof getToken === 'function') ? getToken() : (localStorage.getItem('access_token')||'');
+        if (!token) { hide(accEls); show(loginEls); return; }
+        try {
+          const base = (window.API_BASE || '').replace(/\/$/, '');
+          const res = await fetch(base + '/me', { headers:{ 'Authorization': `Bearer ${token}` } });
+          if (!res.ok) throw new Error(String(res.status));
+          hide(loginEls); show(accEls);
+        } catch {
+          try { localStorage.removeItem('access_token'); } catch {}
+          hide(accEls); show(loginEls);
+        }
+      }
+      document.addEventListener('DOMContentLoaded', apply);
+      try{ apply(); }catch{}
+      window.refreshAccountNav = apply;
+      window.addEventListener('storage', (e)=>{ if (e.key === 'access_token') apply(); });
+    })();
+
+    // ====== Create Asset modal + flow ======
+    (() => {
+      const openBtn = document.getElementById('createassets');
+      const modal = document.getElementById('createAssetModal');
+      const overlay = document.getElementById('camOverlay');
+      const closeBtn = document.getElementById('camClose');
+      const cancelBtn = document.getElementById('caCancel');
+      const form = document.getElementById('createAssetForm');
+
+      function openModal(){
+        if (!getToken()) {
+          try { alert('Vui lòng đăng nhập trước khi tạo tài sản.'); } catch {}
+          try { openAuth('login'); } catch {}
+          return;
+        }
+        modal?.classList.remove('hidden'); document.body.classList.add('drawer-open');
+      }
+      function closeModal(){ modal?.classList.add('hidden'); document.body.classList.remove('drawer-open'); form?.reset(); }
+      openBtn?.addEventListener('click', openModal);
+      overlay?.addEventListener('click', closeModal);
+      closeBtn?.addEventListener('click', closeModal);
+      cancelBtn?.addEventListener('click', closeModal);
+
+      async function submitCreate(e){
+        e.preventDefault();
+        const token = localStorage.getItem('access_token');
+        if (!token){ alert('Vui lòng đăng nhập'); return; }
+        const payload = {
+          title: document.getElementById('ca_title').value.trim(),
+          description: document.getElementById('ca_description').value.trim(),
+          listing_type: document.getElementById('ca_listing_type').value,
+          asset_type: document.getElementById('ca_asset_type').value,
+          asset_subtype: document.getElementById('ca_asset_subtype').value,
+          asset_legaltype: document.getElementById('ca_asset_legaltype').value,
+          price: document.getElementById('ca_price').value || null,
+          square: document.getElementById('ca_square').value || null,
+          province: document.getElementById('ca_province').value,
+          city: document.getElementById('ca_city').value,
+          district: document.getElementById('ca_district').value,
+          main_street: document.getElementById('ca_main_street').value || null,
+          main_street_width: document.getElementById('ca_main_street_width').value || null,
+          alley: document.getElementById('ca_alley').checked,
+          alley_width: document.getElementById('ca_alley_width').value || null,
+          mattien: document.getElementById('ca_mattien').checked,
+          google_map_id: document.getElementById('ca_google_map_id').value || null,
+          thua_dat_id: document.getElementById('ca_thua_dat_id').value || null,
+          to_ban_do_id: document.getElementById('ca_to_ban_do_id').value || null,
+        };
+        try{
+          // 1) Create listing
+          const res = await fetch(`${API_BASE}/listings`, {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+          });
+          // Handle auth expiration explicitly
+          if (res.status === 401) {
+            try { const j = await res.json(); if (j?.detail) throw new Error(`__AUTH__:${j.detail}`); } catch {}
+            throw new Error('__AUTH__:Unauthorized');
+          }
+          const created = await res.json();
+          if (!res.ok) throw new Error(created.detail || 'Tạo tài sản thất bại');
+
+          // 2) Upload header image (optional)
+          const file = document.getElementById('ca_header').files?.[0];
+          if (file){
+            const fd = new FormData();
+            fd.append('file', file, file.name);
+            const up = await fetch(`${API_BASE}/listings/${created.listing_id}/header-image`, {
+              method:'POST', headers:{ 'Authorization': `Bearer ${token}` }, body: fd
+            });
+            if (up.status === 401) {
+              try { const j = await up.json(); if (j?.detail) throw new Error(`__AUTH__:${j.detail}`); } catch {}
+              throw new Error('__AUTH__:Unauthorized');
+            }
+            const upj = await up.json();
+            if (!up.ok) throw new Error(upj.detail || 'Upload ảnh thất bại');
+          }
+
+          alert('Tạo tài sản thành công');
+          closeModal();
+          // Refresh current list with existing filters
+          try{ await applyFilters(); }catch{ loadGalleryProducts(new URLSearchParams({ status: 'active' })); }
+        }catch(err){
+          const msg = String(err?.message || '');
+          if (msg.startsWith('__AUTH__')){
+            alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            try { localStorage.removeItem('access_token'); } catch {}
+            try { openAuth('login'); } catch {}
+            return;
+          }
+          alert(err.message || 'Lỗi kết nối');
+        }
+      }
+      form?.addEventListener('submit', submitCreate);
+    })();
+  </script>
+  <script>
+    // AI chat: handle send and render
+    (function initAIChat(){
+      const form = document.getElementById('aiForm');
+      const input = document.getElementById('aiInput');
+      const chat = document.getElementById('aiChat');
+      const typing = document.getElementById('aiTyping');
+      const modelSel = document.getElementById('aiModel');
+      if (!form || !input || !chat) return;
+      // Try load available models from backend
+      (async function loadModels(){
+        try{
+          const res = await fetch((window.API_BASE||'').replace(/\/$/, '') + '/ai/models');
+          const list = await res.json();
+          if (res.ok && Array.isArray(list) && list.length){
+            modelSel.innerHTML = '';
+            list.forEach(name => {
+              const opt = document.createElement('option');
+              opt.value = name.replace(/^models\//,'');
+              opt.textContent = opt.value;
+              modelSel.appendChild(opt);
+            });
+          }
+        }catch{}
+      })();
+
+      function addBubble(text, who){
+        const wrap = document.createElement('div');
+        wrap.className = 'flex gap-2 ' + (who==='user' ? 'justify-end' : '');
+        const avatar = document.createElement('div');
+        avatar.className = 'w-8 h-8 rounded-full ' + (who==='user' ? 'bg-slate-200' : 'bg-blue-100') + ' flex items-center justify-center flex-shrink-0';
+        avatar.innerHTML = who==='user' ? '<i class="fas fa-user text-slate-600"></i>' : '<i class="fas fa-robot text-blue-600"></i>';
+        const bubble = document.createElement('div');
+        bubble.className = 'glass rounded-2xl px-4 py-3 max-w-[80%]';
+        bubble.innerText = text;
+        if (who==='user') { wrap.appendChild(bubble); wrap.appendChild(avatar); }
+        else { wrap.appendChild(avatar); wrap.appendChild(bubble); }
+        chat.appendChild(wrap);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      async function sendMessage(e){
+        e.preventDefault();
+        const msg = input.value.trim();
+        if (!msg) return;
+        const token = localStorage.getItem('access_token') || '';
+        if (!token){ try{ alert('Vui lòng đăng nhập để dùng AI.'); }catch{} try{ openAuth && openAuth('login'); }catch{} return; }
+
+        addBubble(msg, 'user');
+        input.value = '';
+        typing?.classList.remove('hidden');
+        try{
+          const payload = { message: msg, model: (modelSel?.value || 'gemini-1.5-flash') };
+          const res = await fetch((window.API_BASE||'').replace(/\/$/, '') + '/ai/chat', {
+            method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload)
+          });
+          const data = await res.json().catch(()=>({}));
+          if (res.status === 401){
+            try { alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'); } catch{}
+            try { localStorage.removeItem('access_token'); } catch{}
+            try { openAuth && openAuth('login'); } catch{}
+            return;
+          }
+          if (!res.ok) throw new Error(data?.detail || ('HTTP '+res.status));
+          addBubble(String(data?.response || '').trim() || '');
+        }catch(err){
+          console.error('[AI chat]', err);
+          const msg = String(err?.message || '');
+          if (/AI service not configured|503/.test(msg)){
+            addBubble('AI chưa được cấu hình. Vui lòng đặt GOOGLE_API_KEY (hoặc GEMINI_API_KEY) cho backend và cài google-generativeai.', 'ai');
+          } else if (/model unavailable|404|not found|not supported/i.test(msg)){
+            addBubble('Model không khả dụng hoặc không hỗ trợ generateContent. Hãy chọn model khác trong danh sách.', 'ai');
+          } else {
+            addBubble('Không gửi được: ' + msg, 'ai');
+          }
+        }finally{
+          typing?.classList.add('hidden');
+        }
+      }
+
+      form.addEventListener('submit', sendMessage);
+    })();
+  </script>
+</body>
+</html>
